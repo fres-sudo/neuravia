@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { patients } from "@/server/db/schema";
 import { takeFirstOrThrow } from "@/lib/utils";
 import { createPatientSchema } from "@/server/db/zod";
+import { z } from "zod";
 
 export const patientsRouter = createTRPCRouter({
 	fetch: protectedProcedure.query(async ({ ctx }) => {
@@ -28,5 +29,28 @@ export const patientsRouter = createTRPCRouter({
 				})
 				.returning()
 				.then(takeFirstOrThrow);
+		}),
+
+	delete: protectedProcedure
+		.input(z.object({ patientId: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			// First, verify that the patient belongs to the caregiver
+			const patient = await ctx.db
+				.query.patients.findFirst({
+					where: eq(patients.id, input.patientId),
+				});
+
+			if (!patient) {
+				throw new Error("Patient not found");
+			}
+
+			if (patient.caregiverId !== ctx.session.user.id) {
+				throw new Error("Unauthorized");
+			}
+
+			// If verification passes, delete the patient
+			await ctx.db
+				.delete(patients)
+				.where(eq(patients.id, input.patientId));
 		}),
 });

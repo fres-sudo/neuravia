@@ -14,6 +14,7 @@ import { formatDate } from "date-fns";
 import { User, Settings, Notebook, BarChart3, Images } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPatientDialog from "../../components/add-patient-dialog";
+import DeletePatientDialog from "../../components/delete-patient-dialog";
 import { ModeToggle } from "@/components/mode-toggle";
 export default function Page() {
 	const query = api.patients.fetch.useQuery();
@@ -126,6 +127,7 @@ export default function Page() {
 													}>
 													<Images className="h-4 w-4" />
 												</Button>
+												<DeletePatientDialog patientId={patient.id} patientName={patient.name} />
 												<div className="flex items-center space-x-4 mb-4">
 													<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
 														<User className="h-6 w-6 text-primary" />
