@@ -127,9 +127,6 @@ export default function StatisticsPage() {
             </p>
           </div>
         </div>
-        <Badge variant="outline" className="text-sm">
-          Patient ID: {patientId}
-        </Badge>
       </div>
 
       {/* Statistics Cards */}
