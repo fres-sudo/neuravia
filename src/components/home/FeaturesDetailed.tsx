@@ -5,42 +5,42 @@ const FeaturesDetailed = () => {
 		{
 			title: "Alzheimer Score",
 			description:
-				"Il nostro sistema proprietario traccia lo stato cognitivo e comportamentale nel tempo, fornendo insight chiari sulla progressione per famiglie e clinici attraverso dati raccolti dai giochi quotidiani del paziente.",
+				"Our proprietary system tracks cognitive and behavioral status over time, providing clear insights into progression for families and clinicians through data collected from the patient's daily games.",
 			image: "/alzheimer-score.png",
 			reverse: false,
 		},
 		{
-			title: "Giochi Cognitivi",
+			title: "Cognitive Games",
 			description:
-				"Giochi divertenti e scientificamente validati che connettono la memoria a lungo termine con quella a breve termine. Il paziente riceve un link dal caregiver e inizia a giocare quotidianamente, rendendo la terapia coinvolgente.",
+				"Fun and scientifically validated games that connect long-term memory with short-term memory. The patient receives a link from the caregiver and starts playing daily, making therapy engaging.",
 			image: "/mri-analysis.png",
 			reverse: true,
 		},
 		{
-			title: "Supporto Caregiver",
+			title: "Caregiver Support",
 			description:
-				"Strumenti completi per i caregiver che inviano il link al paziente e monitorano i progressi, con funzionalità di comunicazione e risorse educative per un migliore coordinamento delle cure.",
+				"Comprehensive tools for caregivers who send the link to the patient and monitor progress, with communication features and educational resources for better care coordination.",
 			image: "/caregiver-support.png",
 			reverse: false,
 		},
 		{
-			title: "Analisi MRI Potenziata da AI",
+			title: "AI-Enhanced MRI Analysis",
 			description:
-				"I caregiver possono caricare scansioni MRI per ricevere feedback personalizzato guidato dall'AI, arricchendo le valutazioni cliniche con dati continui del mondo reale raccolti attraverso i giochi.",
+				"Caregivers can upload MRI scans to receive personalized AI-guided feedback, enriching clinical assessments with continuous real-world data collected through games.",
 			image: "/mri-analysis.png",
 			reverse: true,
 		},
 		{
-			title: "Diario della Memoria",
+			title: "Memory Journal",
 			description:
-				"Un diario integrato incoraggia i pazienti a connettere le esperienze a breve termine con le memorie a lungo termine, rafforzando la continuità nella vita quotidiana dopo le sessioni di gioco.",
+				"An integrated journal encourages patients to connect short-term experiences with long-term memories, reinforcing continuity in daily life after gaming sessions.",
 			image: "/memory-journal.png",
 			reverse: false,
 		},
 		{
-			title: "Educazione al Benessere",
+			title: "Wellness Education",
 			description:
-				"Moduli educativi completi forniti in un formato intuitivo per supportare l'apprendimento del paziente e la comprensione della famiglia, integrati nel percorso di gioco quotidiano.",
+				"Comprehensive educational modules provided in an intuitive format to support patient learning and family understanding, integrated into the daily gaming journey.",
 			image: "/wellness-education.png",
 			reverse: true,
 		},
