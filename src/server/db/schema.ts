@@ -62,36 +62,18 @@ export const verification = sqliteTable("verification", {
 
 // ---------------------------------------------
 
-// Caregivers table
-export const caregivers = sqliteTable("caregivers", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	email: text("email").unique(),
-	passwordHash: text("password_hash"),
-	firstName: text("first_name").notNull(),
-	lastName: text("last_name").notNull(),
-	provider: text("provider"),
-	providerId: text("provider_id").unique(),
-	country: text("country"),
-	city: text("city"),
-	phoneNumber: text("phone_number"),
-	birthYear: integer("birth_year"),
-	lastLoginAt: text("last_login_at"), // SQLite doesn't have datetime, use text with ISO string
-	createdAt: text("created_at").default(sql`(datetime('now'))`),
-	updatedAt: text("updated_at").default(sql`(datetime('now'))`),
-});
-
 // Caregiver settings table (1:1 with caregivers)
 export const caregiverSettings = sqliteTable(
 	"caregiver_settings",
 	{
-		caregiverId: integer("caregiver_id").primaryKey(),
+		caregiverId: text("caregiver_id").primaryKey(),
 		settings: text("settings", { mode: "json" }), // JSON column
 		updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 	},
 	(table) => [
 		foreignKey({
 			columns: [table.caregiverId],
-			foreignColumns: [caregivers.id],
+			foreignColumns: [user.id],
 			name: "caregiver_settings_caregiver_id_fk",
 		}).onDelete("cascade"),
 	]
@@ -102,7 +84,7 @@ export const patients = sqliteTable(
 	"patients",
 	{
 		id: text("id").primaryKey(), // UUID as text
-		caregiverId: integer("caregiver_id").notNull(),
+		caregiverId: text("caregiver_id").notNull(),
 		name: text("name").notNull(),
 		age: integer("age").notNull(),
 		personalityDescription: text("personality_description"),
@@ -115,7 +97,7 @@ export const patients = sqliteTable(
 	(table) => [
 		foreignKey({
 			columns: [table.caregiverId],
-			foreignColumns: [caregivers.id],
+			foreignColumns: [user.id],
 			name: "patients_caregiver_id_fk",
 		}).onDelete("cascade"),
 	]
@@ -140,7 +122,7 @@ export const patientSettings = sqliteTable(
 
 // Activity templates table
 export const activityTemplates = sqliteTable("activity_templates", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
+	id: text("id").primaryKey(),
 	name: text("name").notNull(),
 	configSchema: text("config_schema", { mode: "json" }),
 	softSkillWeights: text("soft_skill_weights", { mode: "json" }),
@@ -149,7 +131,7 @@ export const activityTemplates = sqliteTable("activity_templates", {
 export const levelDefinitions = sqliteTable(
 	"level_definitions",
 	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
+		id: text("id").primaryKey(),
 		activityTemplateId: integer("activity_template_id").notNull(),
 		level: integer("level").notNull(),
 		difficulty: text("difficulty").notNull(),
@@ -169,7 +151,7 @@ export const levelDefinitions = sqliteTable(
 export const activityInstances = sqliteTable(
 	"activity_instances",
 	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
+		id: text("id").primaryKey(),
 		patientId: text("patient_id").notNull(),
 		activityTemplateId: integer("activity_template_id").notNull(),
 		levelPlayedId: integer("level_played_id").notNull(),
@@ -221,9 +203,9 @@ export const diaries = sqliteTable(
 );
 
 // Relations
-export const caregiversRelations = relations(caregivers, ({ one, many }) => ({
+export const caregiversRelations = relations(user, ({ one, many }) => ({
 	settings: one(caregiverSettings, {
-		fields: [caregivers.id],
+		fields: [user.id],
 		references: [caregiverSettings.caregiverId],
 	}),
 	patients: many(patients),
@@ -232,17 +214,17 @@ export const caregiversRelations = relations(caregivers, ({ one, many }) => ({
 export const caregiverSettingsRelations = relations(
 	caregiverSettings,
 	({ one }) => ({
-		caregiver: one(caregivers, {
+		caregiver: one(user, {
 			fields: [caregiverSettings.caregiverId],
-			references: [caregivers.id],
+			references: [user.id],
 		}),
 	})
 );
 
 export const patientsRelations = relations(patients, ({ one, many }) => ({
-	caregiver: one(caregivers, {
+	caregiver: one(user, {
 		fields: [patients.caregiverId],
-		references: [caregivers.id],
+		references: [user.id],
 	}),
 	settings: one(patientSettings, {
 		fields: [patients.id],
@@ -310,8 +292,8 @@ export const diariesRelations = relations(diaries, ({ one }) => ({
 }));
 
 // Type exports for TypeScript
-export type Caregiver = typeof caregivers.$inferSelect;
-export type NewCaregiver = typeof caregivers.$inferInsert;
+export type Caregiver = typeof user.$inferSelect;
+export type NewCaregiver = typeof user.$inferInsert;
 
 export type CaregiverSetting = typeof caregiverSettings.$inferSelect;
 export type NewCaregiverSetting = typeof caregiverSettings.$inferInsert;

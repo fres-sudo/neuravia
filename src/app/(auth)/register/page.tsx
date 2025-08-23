@@ -13,7 +13,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/server/auth/auth-client";
+import { signIn, signUp } from "@/server/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -32,7 +32,7 @@ const registerSchema = z
 			.max(50, "Name cannot exceed 50 characters")
 			.regex(
 				/^[a-zA-ZÀ-ÿ\s'.-]+$/,
-				"Name can only contain letters, spaces and apostrophes",
+				"Name can only contain letters, spaces and apostrophes"
 			),
 		email: z.email("Enter a valid email address"),
 		password: z
@@ -41,14 +41,14 @@ const registerSchema = z
 			.min(8, "Password must contain at least 8 characters")
 			.regex(
 				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-				"Password must contain at least one lowercase letter, one uppercase letter, and one number",
+				"Password must contain at least one lowercase letter, one uppercase letter, and one number"
 			),
 		confirmPassword: z.string().min(1, "Password confirmation is required"),
 		agreeToTerms: z
 			.boolean()
 			.refine(
 				(val) => val === true,
-				"You must accept the terms of service and privacy policy",
+				"You must accept the terms of service and privacy policy"
 			),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
@@ -80,7 +80,7 @@ const RegisterPage = () => {
 		setIsLoading(true);
 
 		try {
-			const result = await authClient.signUp.email({
+			const result = await signUp.email({
 				email: data.email,
 				password: data.password,
 				name: data.name,
@@ -89,7 +89,7 @@ const RegisterPage = () => {
 
 			if (result.error) {
 				setError(
-					result.error.message || "An error occurred during registration",
+					result.error.message || "An error occurred during registration"
 				);
 			}
 		} catch (err) {
@@ -103,7 +103,7 @@ const RegisterPage = () => {
 	const handleGoogleSignIn = async () => {
 		try {
 			setIsLoading(true);
-			const result = await authClient.signIn.social({
+			const result = await signIn.social({
 				provider: "google",
 				callbackURL: "/dashboard",
 			});
@@ -133,12 +133,13 @@ const RegisterPage = () => {
 			</div>
 
 			<Form {...form}>
-				<form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+				<form
+					className="space-y-5"
+					onSubmit={form.handleSubmit(onSubmit)}>
 					{error && (
 						<Alert
 							variant="destructive"
-							className="animate-delay-300 animate-element"
-						>
+							className="animate-delay-300 animate-element">
 							<AlertDescription>{error}</AlertDescription>
 						</Alert>
 					)}
@@ -210,8 +211,7 @@ const RegisterPage = () => {
 											size="sm"
 											className="absolute inset-y-0 right-0 px-3 py-0 hover:bg-transparent"
 											onClick={() => setShowPassword(!showPassword)}
-											disabled={isLoading || form.formState.isSubmitting}
-										>
+											disabled={isLoading || form.formState.isSubmitting}>
 											{showPassword ? (
 												<EyeOff className="h-4 w-4 text-muted-foreground" />
 											) : (
@@ -254,8 +254,7 @@ const RegisterPage = () => {
 											onClick={() =>
 												setShowConfirmPassword(!showConfirmPassword)
 											}
-											disabled={isLoading || form.formState.isSubmitting}
-										>
+											disabled={isLoading || form.formState.isSubmitting}>
 											{showConfirmPassword ? (
 												<EyeOff className="h-4 w-4 text-muted-foreground" />
 											) : (
@@ -286,15 +285,13 @@ const RegisterPage = () => {
 										I accept the{" "}
 										<Link
 											href="#"
-											className="text-violet-400 transition-colors hover:underline"
-										>
+											className="text-violet-400 transition-colors hover:underline">
 											Terms of Service
 										</Link>{" "}
 										and the{" "}
 										<Link
 											href="#"
-											className="text-violet-400 transition-colors hover:underline"
-										>
+											className="text-violet-400 transition-colors hover:underline">
 											Privacy Policy
 										</Link>
 									</FormLabel>
@@ -307,8 +304,7 @@ const RegisterPage = () => {
 					<Button
 						type="submit"
 						disabled={isLoading || form.formState.isSubmitting}
-						className="w-full animate-delay-800 animate-element rounded-2xl py-6 font-medium"
-					>
+						className="w-full animate-delay-800 animate-element rounded-2xl py-6 font-medium">
 						{isLoading || form.formState.isSubmitting
 							? "Creating account..."
 							: "Create Account"}
@@ -327,8 +323,7 @@ const RegisterPage = () => {
 				variant="outline"
 				onClick={handleGoogleSignIn}
 				disabled={isLoading || form.formState.isSubmitting}
-				className="w-full animate-delay-800 animate-element rounded-2xl border-border py-6 hover:bg-secondary"
-			>
+				className="w-full animate-delay-800 animate-element rounded-2xl border-border py-6 hover:bg-secondary">
 				<GoogleIcon />
 				Continue with Google
 			</Button>
@@ -337,8 +332,7 @@ const RegisterPage = () => {
 				Already have an account?{" "}
 				<Link
 					href="/login"
-					className="text-violet-400 transition-colors hover:underline"
-				>
+					className="text-violet-400 transition-colors hover:underline">
 					Log in
 				</Link>
 			</p>

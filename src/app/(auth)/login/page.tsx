@@ -12,7 +12,6 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/server/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -20,6 +19,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { GoogleIcon } from "../layout";
+import { signIn } from "@/server/auth/auth-client";
 
 const loginSchema = z.object({
 	email: z.email("Enter a valid email address"),
@@ -51,7 +51,7 @@ const LoginPage = () => {
 		setIsLoading(true);
 
 		try {
-			const result = await authClient.signIn.email({
+			const result = await signIn.email({
 				email: data.email,
 				password: data.password,
 				rememberMe: data.rememberMe,
@@ -72,7 +72,7 @@ const LoginPage = () => {
 	const handleGoogleSignIn = async () => {
 		try {
 			setIsLoading(true);
-			const result = await authClient.signIn.social({
+			const result = await signIn.social({
 				provider: "google",
 				callbackURL: "/dashboard",
 			});
@@ -106,12 +106,13 @@ const LoginPage = () => {
 			</div>
 
 			<Form {...form}>
-				<form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+				<form
+					className="space-y-5"
+					onSubmit={form.handleSubmit(onSubmit)}>
 					{error && (
 						<Alert
 							variant="destructive"
-							className="animate-delay-300 animate-element"
-						>
+							className="animate-delay-300 animate-element">
 							<AlertDescription>{error}</AlertDescription>
 						</Alert>
 					)}
@@ -161,8 +162,7 @@ const LoginPage = () => {
 											size="sm"
 											className="absolute inset-y-0 right-0 px-3 py-0 hover:bg-transparent"
 											onClick={() => setShowPassword(!showPassword)}
-											disabled={isLoading || form.formState.isSubmitting}
-										>
+											disabled={isLoading || form.formState.isSubmitting}>
 											{showPassword ? (
 												<EyeOff className="h-4 w-4 text-muted-foreground" />
 											) : (
@@ -200,8 +200,7 @@ const LoginPage = () => {
 							variant="link"
 							className="h-auto p-0 text-violet-400 hover:text-violet-300"
 							onClick={handleResetPassword}
-							disabled={isLoading || form.formState.isSubmitting}
-						>
+							disabled={isLoading || form.formState.isSubmitting}>
 							Reset password
 						</Button>
 					</div>
@@ -209,8 +208,7 @@ const LoginPage = () => {
 					<Button
 						type="submit"
 						disabled={isLoading || form.formState.isSubmitting}
-						className="w-full animate-delay-600 animate-element rounded-2xl py-6 font-medium"
-					>
+						className="w-full animate-delay-600 animate-element rounded-2xl py-6 font-medium">
 						{isLoading || form.formState.isSubmitting
 							? "Logging in..."
 							: "Log in"}
@@ -229,8 +227,7 @@ const LoginPage = () => {
 				variant="outline"
 				onClick={handleGoogleSignIn}
 				disabled={isLoading || form.formState.isSubmitting}
-				className="w-full animate-delay-800 animate-element rounded-2xl border-border py-6 hover:bg-secondary"
-			>
+				className="w-full animate-delay-800 animate-element rounded-2xl border-border py-6 hover:bg-secondary">
 				<GoogleIcon />
 				Continue with Google
 			</Button>
@@ -239,8 +236,7 @@ const LoginPage = () => {
 				New to our platform?{" "}
 				<Link
 					href="/register"
-					className="text-violet-400 transition-colors hover:underline"
-				>
+					className="text-violet-400 transition-colors hover:underline">
 					Create Account
 				</Link>
 			</p>
