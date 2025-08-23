@@ -11,7 +11,7 @@ import { hasCurrentWeekDiary } from "@/lib/utils";
 import { signOut, useSession } from "@/server/auth/auth-client";
 import { api } from "@/trpc/react";
 import { formatDate } from "date-fns";
-import { Plus, User, Settings, Notebook, BarChart3 } from "lucide-react";
+import {Plus, User, Settings, Notebook, BarChart3, Images} from "lucide-react";
 import { useRouter } from "next/navigation";
 export default function Page() {
 	const query = api.patitents.getPatients.useQuery();
@@ -121,6 +121,14 @@ export default function Page() {
 											key={patient.id}
 											className="relative group hover:shadow-md transition-shadow">
 											<CardContent className="p-6">
+												<Button
+													size="icon"
+													variant="outline"
+													className="absolute top-4 right-4"
+													onClick={() => router.push(`/patient/${patient.id}/upload`)}
+												  >
+													<Images className="h-4 w-4" />
+												  </Button>
 												<div className="flex items-center space-x-4 mb-4">
 													<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
 														<User className="h-6 w-6 text-primary" />

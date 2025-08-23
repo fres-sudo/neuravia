@@ -202,6 +202,25 @@ export const diaries = sqliteTable(
 	]
 );
 
+// Images table
+export const images = sqliteTable(
+	"images",
+	{
+		id: text("id").primaryKey(), // UUID as text
+		patientId: text("patient_id").notNull(),
+		filename: text("filename").notNull(),
+		uploadedAt: text("uploaded_at").default(sql`(datetime('now'))`),
+		results: text("results", { mode: "json" }), // JSON column for results
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.patientId],
+			foreignColumns: [patients.id],
+			name: "images_patient_id_fk",
+		}).onDelete("cascade"),
+	]
+)
+
 // Relations
 export const caregiversRelations = relations(user, ({ one, many }) => ({
 	settings: one(caregiverSettings, {
@@ -287,6 +306,13 @@ export const activityInstancesRelations = relations(
 export const diariesRelations = relations(diaries, ({ one }) => ({
 	patient: one(patients, {
 		fields: [diaries.patientId],
+		references: [patients.id],
+	}),
+}));
+
+export const imagesRelations = relations(images, ({ one }) => ({
+	patient: one(patients, {
+		fields: [images.patientId],
 		references: [patients.id],
 	}),
 }));
