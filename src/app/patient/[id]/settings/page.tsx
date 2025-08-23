@@ -65,6 +65,7 @@ export default function Page() {
   const updateSettingsMutation = api.patientSettings.updateSettings.useMutation({
     onSuccess: () => {
       toast.success("Settings updated successfully");
+      router.push("/dashboard");
       setError(null);
     },
     onError: (err) => {
