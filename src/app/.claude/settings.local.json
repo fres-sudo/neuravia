@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/fres/dev/hackatons/neuravia/src/components/game/**)",
+      "Read(//Users/fres/dev/hackatons/neuravia/src/components/game/**)",
+      "Read(//Users/fres/dev/hackatons/neuravia/src/components/game/**)",
+      "Read(//Users/fres/dev/hackatons/neuravia/src/stores/**)",
+      "Read(//Users/fres/dev/hackatons/neuravia/**)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/fres/dev/hackatons/neuravia"
+    ]
+  }
+}

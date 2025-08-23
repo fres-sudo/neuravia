@@ -11,16 +11,51 @@ import { hasCurrentWeekDiary } from "@/lib/utils";
 import { signOut, useSession } from "@/server/auth/auth-client";
 import { api } from "@/trpc/react";
 import { formatDate } from "date-fns";
-import { User, Settings, Notebook, BarChart3, Images } from "lucide-react";
+import {
+	User,
+	Settings,
+	Notebook,
+	BarChart3,
+	Images,
+	Copy,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPatientDialog from "../../components/add-patient-dialog";
 import DeletePatientDialog from "../../components/delete-patient-dialog";
 import { ModeToggle } from "@/components/mode-toggle";
+import Link from "next/link";
+import { toast } from "sonner";
+
 export default function Page() {
 	const query = api.patients.fetch.useQuery();
 
 	const { data: session } = useSession();
 	const router = useRouter();
+
+	const handleCopyLink = async (patientId: string) => {
+		const url = `http${
+			process.env.NODE_ENV === "development"
+				? "://localhost"
+				: `s://${process.env.VERCEL_URL}`
+		}/room/${session?.user.id}/${patientId}`;
+
+		try {
+			await navigator.clipboard.writeText(url);
+			// Optional: Add success feedback
+			toast.success("Link copied to the clipboard");
+			// You could also show a toast notification here
+			// toast.success("Link copied to clipboard!");
+		} catch (err) {
+			toast.error("Failed to copy link");
+			// Fallback for older browsers
+			const textArea = document.createElement("textarea");
+			textArea.value = url;
+			document.body.appendChild(textArea);
+			textArea.select();
+			document.execCommand("copy");
+			document.body.removeChild(textArea);
+		}
+	};
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -144,54 +179,56 @@ export default function Page() {
 												</div>
 
 												<div className="flex space-x-2">
-													<Button
-														size="sm"
-														variant="default"
-														className="flex-1"
-														onClick={() =>
-															router.push(`/patient/${patient.id}`)
-														}>
-														<User className="h-4 w-4 mr-1" />
-														Enter
-													</Button>
-													<Button
-														size="sm"
-														variant="outline"
-														onClick={() =>
-															router.push(`/patient/${patient.id}/settings`)
-														}>
-														<Settings className="h-4 w-4" />
-													</Button>
+													<Link
+														href={`http${
+															process.env.NODE_ENV === "development"
+																? "://localhost:3000"
+																: `s://${process.env.VERCEL_URL}`
+														}/room/${session?.user.id}/${patient.id}`}>
+														<Button
+															size="sm"
+															variant="default"
+															className="flex-1"
+															onClick={() => handleCopyLink(patient.id)}>
+															<Copy className="h-4 w-4 mr-1" />
+															Room Link
+														</Button>
+													</Link>
+													<Link href={`/patient/${patient.id}/settings`}>
+														<Button
+															size="sm"
+															variant="outline">
+															<Settings className="h-4 w-4" />
+														</Button>
+													</Link>
 													{(() => {
 														const alreadyDone = hasCurrentWeekDiary(
 															patient.diaries
 														);
 
 														return (
-															<Button
-																size="sm"
-																onClick={() =>
-																	router.push(`/patient/${patient.id}/diary`)
-																}
-																disabled={alreadyDone}
-																className={`flex-1 ${
-																	alreadyDone
-																		? "bg-green-500 hover:bg-green-600 text-white"
-																		: "bg-orange-500 hover:bg-orange-600 text-white"
-																}`}>
-																<Notebook className="h-4 w-4 mr-1" />
-																{alreadyDone ? "Diary done" : "Fill diary"}
-															</Button>
+															<Link href={`/patient/${patient.id}/diary`}>
+																<Button
+																	size="sm"
+																	disabled={alreadyDone}
+																	className={`flex-1 ${
+																		alreadyDone
+																			? "bg-green-500 hover:bg-green-600 text-white"
+																			: "bg-orange-500 hover:bg-orange-600 text-white"
+																	}`}>
+																	<Notebook className="h-4 w-4 mr-1" />
+																	{alreadyDone ? "Diary done" : "Fill diary"}
+																</Button>
+															</Link>
 														);
 													})()}
-													<Button
-														size="sm"
-														variant="outline"
-														onClick={() =>
-															router.push(`/patient/${patient.id}/statistics`)
-														}>
-														<BarChart3 className="h-4 w-4" />
-													</Button>
+													<Link href={`/patient/${patient.id}/statistics`}>
+														<Button
+															size="sm"
+															variant="outline">
+															<BarChart3 className="h-4 w-4" />
+														</Button>
+													</Link>
 												</div>
 											</CardContent>
 										</Card>
