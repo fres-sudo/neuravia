@@ -39,8 +39,16 @@ export class BoostScoreService {
       return Math.max(0, Math.min(100, weightedScore));
     }
 
-    async calculateInitialAssessment(responses: any): Promise<number> {
-        return 80;
+    async calculateInitialAssessment(initialInfo: any): Promise<number> {
+      // Calculate base score from diagnosis and stage
+      let baseScore = this.calculateBaseScore(initialInfo.diagnosis, initialInfo.stage);
+
+      // If notes are provided, use LLM to adjust the score
+      if (initialInfo.notes && initialInfo.notes.trim().length > 0) {
+        const adjustedScore = await this.adjustScoreWithLLM(baseScore, initialInfo.notes, initialInfo.diagnosis, initialInfo.stage);
+        return Math.max(1, Math.min(100, adjustedScore));
+      }
+      return baseScore;
     }
 
     async calculateWeeklyForm(responses: any): Promise<number> {
@@ -103,5 +111,92 @@ export class BoostScoreService {
             weight,
             metadata: data.metadata,
         };
+    }
+
+    private calculateBaseScore(diagnosis: string, stage: string): number {
+      // Base scores for diagnosis
+      const diagnosisScores = {
+        'None': 85,        // No Alzheimer's - high score
+        'Suspected': 65,   // Suspected - medium-high score
+        'Confirmed': 45    // Confirmed - lower base score
+      };
+
+      // Stage modifiers (only apply if diagnosis is Suspected or Confirmed)
+      const stageModifiers = {
+        'Mild': 0,         // No additional penalty
+        'Moderate': -15,   // Reduce score by 15
+        'Severe': -30      // Reduce score by 30
+      };
+
+      let score = diagnosisScores[diagnosis as keyof typeof diagnosisScores] || 50;
+
+      // Apply stage modifier only if there's a diagnosis
+      if (diagnosis !== 'None' && stage) {
+        const modifier = stageModifiers[stage as keyof typeof stageModifiers] || 0;
+        score += modifier;
+      }
+
+      return Math.max(1, Math.min(100, score));
+    }
+
+    private async adjustScoreWithLLM(baseScore: number, notes: string, diagnosis: string, stage: string): Promise<number> {
+        console.log('Adjusting score with LLM, baseScore:', baseScore, 'notes:', notes);
+        const prompt = `You are a medical AI assistant helping to assess Alzheimer's disease severity for initial patient scoring.
+    
+    CONTEXT:
+    - Current base score: ${baseScore}/100 (where 100 = healthy, 1 = severe Alzheimer's)
+    - Diagnosis: ${diagnosis}
+    - Stage: ${stage || 'Not specified'}
+    - Caregiver notes: "${notes}"
+    
+    TASK:
+    Based ONLY on the additional information in the caregiver notes, suggest a small adjustment to the base score (-10 to +10 points maximum).
+    
+    GUIDELINES:
+    - Focus on functional abilities, behavioral changes, and cognitive symptoms mentioned
+    - Positive indicators (good memory, independence, stable mood) = small increase (+1 to +5)
+    - Concerning symptoms (confusion, agitation, dependency) = small decrease (-1 to -10)  
+    - If notes are neutral or don't add clinical insight = no change (0)
+    - Be conservative with adjustments
+    
+    RESPONSE FORMAT:
+    Return only a single integer between -10 and +10 representing the adjustment to add to the base score.
+    Examples: -5, 0, +3
+    
+    Adjustment:`;
+
+        try {
+          const response = await fetch('/api/openai', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              prompt,
+              model: 'gpt-4o-mini',
+              temperature: 0.1
+            }),
+          });
+
+          if (!response.ok) {
+            console.error('LLM adjustment failed, using base score');
+            return baseScore;
+          }
+
+          const data = await response.json();
+          const adjustment = parseInt(data.response.trim());
+
+          // Validate adjustment is within bounds
+          if (isNaN(adjustment) || adjustment < -10 || adjustment > 10) {
+            console.warn('Invalid LLM adjustment, using base score');
+            return baseScore;
+          }
+
+          return baseScore + adjustment;
+
+        } catch (error) {
+          console.error('Error calling LLM for score adjustment:', error);
+          return baseScore; // Fallback to base score if LLM fails
+        }
     }
 }
