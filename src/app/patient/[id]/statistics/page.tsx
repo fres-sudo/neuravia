@@ -18,6 +18,16 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
 // Activity type icons mapping
 const activityIcons = {
   initial_assessment: Brain,
@@ -105,188 +115,179 @@ export default function StatisticsPage() {
   })).reverse() || [];
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard")}>
+            <ArrowLeft className="h-4 w-4" /> Back
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Statistics for {currentPatient.name}
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Track progress and activity history
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold">Statistics for {currentPatient.name}</h1>
         </div>
-      </div>
+      </header>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <main className="container mx-auto px-4 py-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Current Score</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{latestScore.toFixed(1)}</div>
+              <p className={`text-xs ${scoreChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {scoreChange >= 0 ? '+' : ''}{scoreChange.toFixed(1)} from last activity
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Activities</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalActivities}</div>
+              <p className="text-xs text-muted-foreground">
+                Activities recorded
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">First Activity</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {boostScores && boostScores.length > 0 && boostScores[boostScores.length - 1]?.timestamp
+                  ? format(new Date(boostScores[boostScores.length - 1]!.timestamp!), 'MMM dd')
+                  : 'N/A'
+                }
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Initial assessment
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Latest Activity</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {boostScores && boostScores.length > 0 && boostScores[0]?.timestamp
+                  ? format(new Date(boostScores[0].timestamp), 'MMM dd')
+                  : 'N/A'
+                }
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {boostScores && boostScores.length > 0 && boostScores[0]?.activityType
+                  ? activityLabels[boostScores[0].activityType as keyof typeof activityLabels]
+                  : 'No activities'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Score Trend Chart */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Score</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Boost Score Trend
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{latestScore.toFixed(1)}</div>
-            <p className={`text-xs ${scoreChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {scoreChange >= 0 ? '+' : ''}{scoreChange.toFixed(1)} from last activity
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Activities</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalActivities}</div>
-            <p className="text-xs text-muted-foreground">
-              Activities recorded
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">First Activity</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {boostScores && boostScores.length > 0 && boostScores[boostScores.length - 1]?.timestamp
-                ? format(new Date(boostScores[boostScores.length - 1]!.timestamp!), 'MMM dd')
-                : 'N/A'
-              }
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Initial assessment
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Latest Activity</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {boostScores && boostScores.length > 0 && boostScores[0]?.timestamp
-                ? format(new Date(boostScores[0].timestamp), 'MMM dd')
-                : 'N/A'
-              }
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {boostScores && boostScores.length > 0 && boostScores[0]?.activityType
-                ? activityLabels[boostScores[0].activityType as keyof typeof activityLabels]
-                : 'No activities'
-              }
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Score Trend Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Boost Score Trend
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {chartData.length > 0 ? (
-            <div className="h-64 flex items-end justify-between gap-1 p-4 bg-gray-50 rounded-lg">
-              {chartData.map((point, index) => {
-                const height = (point.score / 100) * 100; // Convert to percentage
-                const IconComponent = activityIcons[point.activityType as keyof typeof activityIcons];
-                
-                return (
-                  <div key={index} className="flex flex-col items-center flex-1">
-                    <div 
-                      className="w-full bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
-                      style={{ height: `${height}%` }}
-                      title={`${point.score.toFixed(1)} - ${format(point.date, 'MMM dd')}`}
+            {chartData.length > 0 ? (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(date) => format(new Date(date), "MM/dd")}
                     />
-                    <div className="mt-2 text-xs text-gray-600">
-                      {format(point.date, 'MM/dd')}
-                    </div>
-                    <IconComponent className="h-3 w-3 text-gray-400 mt-1" />
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              No score data available
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip
+                      labelFormatter={(date) => format(new Date(date), "MMM dd, yyyy")}
+                      formatter={(value: number) => [`${value.toFixed(1)}`, "Score"]}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke="#2563eb" // blu tailwind
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-gray-500">
+                No score data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Recent Activities */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {boostScores && boostScores.length > 0 ? (
-            <div className="space-y-4">
-              {boostScores.map((score, index) => {
-                const IconComponent = activityIcons[score.activityType as keyof typeof activityIcons];
-                const colorClass = activityColors[score.activityType as keyof typeof activityColors];
-                
-                return (
-                  <div key={score.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${colorClass}`}>
-                        <IconComponent className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">
-                          {activityLabels[score.activityType as keyof typeof activityLabels]}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {score.timestamp ? format(new Date(score.timestamp), 'MMM dd, yyyy HH:mm') : 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-lg">
-                        {score.newScore.toFixed(1)}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Weight: {score.weight}
-                      </div>
-                      {score.previousScore !== null && (
-                        <div className={`text-xs ${score.newScore >= score.previousScore ? 'text-green-600' : 'text-red-600'}`}>
-                          {score.newScore >= score.previousScore ? '+' : ''}
-                          {(score.newScore - score.previousScore).toFixed(1)}
+        {/* Recent Activities */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {boostScores && boostScores.length > 0 ? (
+              <div className="space-y-4">
+                {boostScores.map((score, index) => {
+                  const IconComponent = activityIcons[score.activityType as keyof typeof activityIcons];
+                  const colorClass = activityColors[score.activityType as keyof typeof activityColors];
+
+                  return (
+                    <div key={score.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${colorClass}`}>
+                          <IconComponent className="h-4 w-4" />
                         </div>
-                      )}
+                        <div>
+                          <h3 className="font-medium">
+                            {activityLabels[score.activityType as keyof typeof activityLabels]}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {score.timestamp ? format(new Date(score.timestamp), 'MMM dd, yyyy HH:mm') : 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-lg">
+                          {score.newScore.toFixed(1)}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Weight: {score.weight}
+                        </div>
+                        {score.previousScore !== null && (
+                          <div className={`text-xs ${score.newScore >= score.previousScore ? 'text-green-600' : 'text-red-600'}`}>
+                            {score.newScore >= score.previousScore ? '+' : ''}
+                            {(score.newScore - score.previousScore).toFixed(1)}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              No activities recorded yet
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No activities recorded yet
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </main>
     </div>
   );
 }
