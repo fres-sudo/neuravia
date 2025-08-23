@@ -30,7 +30,7 @@ const Hero = () => {
 							</div>
 							<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
 								Transform Alzheimer's Care with{" "}
-								<span className="bg-gradient-hero bg-clip-text text-transparent">
+								<span className="text-6xl font-bold">
 									Precision Tracking
 								</span>
 							</h1>
@@ -56,7 +56,7 @@ const Hero = () => {
 					<div className="relative">
 						<div className="relative rounded-2xl overflow-hidden shadow-large">
 							<Image
-								src="/alzheimer-score.png"
+								src="/hero-image.png"
 								width={500}
 								height={500}
 								alt="Elderly person using cognitive training app with caregiver support"

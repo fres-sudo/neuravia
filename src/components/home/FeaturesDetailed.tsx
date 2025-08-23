@@ -13,7 +13,7 @@ const FeaturesDetailed = () => {
 			title: "Cognitive Games",
 			description:
 				"Fun and scientifically validated games that connect long-term memory with short-term memory. The patient receives a link from the caregiver and starts playing daily, making therapy engaging.",
-			image: "/mri-analysis.png",
+			image: "/cognitive-games.png",
 			reverse: true,
 		},
 		{
