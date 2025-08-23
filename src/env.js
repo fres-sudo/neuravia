@@ -11,6 +11,7 @@ export const env = createEnv({
 		DATABASE_AUTH_TOKEN: z.string(),
 		BETTER_AUTH_SECRET: z.string(),
 		BETTER_AUTH_URL: z.string().url(),
+		OPENAI_API_KEY: z.string(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -34,6 +35,7 @@ export const env = createEnv({
 		DATABASE_AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN,
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 		NODE_ENV: process.env.NODE_ENV,
 		// NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 	},

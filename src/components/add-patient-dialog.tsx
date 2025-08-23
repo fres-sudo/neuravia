@@ -12,6 +12,7 @@ import { Brain, User, Pen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createPatientSchema } from "@/server/db/zod";
+import { generateEmojisFromJob } from "@/lib/generateEmojis";
 import {
 	Dialog,
 	DialogFooter,
@@ -84,6 +85,7 @@ const AddPatientDialog = () => {
 				biggestPassion: undefined,
 				notes: "",
 			},
+			emojis: "",
 		},
 		mode: "onChange",
 	});
@@ -152,8 +154,30 @@ const AddPatientDialog = () => {
 					: undefined,
 			};
 
-			await createPatientMutation.mutateAsync(transformedData);
+			// Generate emojis based on job
+			let emojis: string[] = [];
+			if (transformedData.job) {
+			  try {
+				  // pass type if not "other", else pass customLabel
+				if (transformedData.job.type !== "other") {
+					emojis = await generateEmojisFromJob(transformedData.job.type);
+				} else {
+					emojis = await generateEmojisFromJob(transformedData.job.customLabel || "");
+				}
+			  } catch (e) {
+				console.error("Emoji generation failed:", e);
+				emojis = []; // fallback se fallisce
+			  }
+			}
+
+			const payload = {
+			  ...transformedData,
+			  emojis: JSON.stringify(emojis),
+			};
+
+			await createPatientMutation.mutateAsync(payload);
 			await utils.patients.fetch.invalidate();
+			await utils.patients.
 			setOpen(false);
 			toast.success(`Success, ${transformedData.name} added!`);
 			router.push("/dashboard");

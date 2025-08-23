@@ -134,7 +134,7 @@ export default function Page() {
 													</div>
 													<div>
 														<h3 className="font-semibold text-lg">
-															{patient.name}
+															{patient.name} - {patient.emojis}
 														</h3>
 														<p className="text-sm text-muted-foreground">
 															{patient.age} year{patient.age !== 1 ? "s" : ""}{" "}

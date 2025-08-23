@@ -16,20 +16,21 @@ export const patientsRouter = createTRPCRouter({
 		});
 	}),
 	create: protectedProcedure
-		.input(createPatientSchema)
-		.mutation(async ({ ctx, input }) => {
-			await ctx.db
-				.insert(patients)
-				.values({
-					id: crypto.randomUUID(),
-					name: input.name,
-					caregiverId: ctx.session.user.id,
-					age: input.age,
-					initialInfo: input.initialInfo,
-				})
-				.returning()
-				.then(takeFirstOrThrow);
-		}),
+	  .input(createPatientSchema)
+	  .mutation(async ({ ctx, input }) => {
+		return await ctx.db
+		  .insert(patients)
+		  .values({
+			id: crypto.randomUUID(),
+			name: input.name,
+			caregiverId: ctx.session.user.id,
+			age: input.age,
+			initialInfo: input.initialInfo,
+			emojis: input.emojis,
+		  })
+		  .returning()
+		  .then(takeFirstOrThrow);
+	  }),
 
 	delete: protectedProcedure
 		.input(z.object({ patientId: z.string() }))

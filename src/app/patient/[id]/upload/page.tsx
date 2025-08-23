@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, labelClass } from "@/lib/utils";
 
 type InferenceResult = {
   predicted_label: string;
@@ -21,21 +21,6 @@ type InferenceResult = {
   probabilities: number[];
   all_labels: string[];
 };
-
-function labelClass(label?: string) {
-  switch (label) {
-    case "Non_Demented":
-      return "bg-emerald-500 text-white";
-    case "Very_Mild_Demented":
-      return "bg-yellow-500 text-white";
-    case "Mild_Demented":
-      return "bg-orange-500 text-white";
-    case "Moderate_Demented":
-      return "bg-red-500 text-white";
-    default:
-      return "bg-muted text-foreground";
-  }
-}
 
 export default function Page() {
   const router = useRouter();

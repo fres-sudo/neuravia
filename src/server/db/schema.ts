@@ -92,6 +92,7 @@ export const patients = sqliteTable(
 		lastActiveAt: text("last_active_at"),
 		createdAt: text("created_at").default(sql`(datetime('now'))`),
 		updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+		emojis: text("emojis"), // Comma-separated emojis
 	},
 	(table) => [
 		foreignKey({

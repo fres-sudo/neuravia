@@ -42,4 +42,5 @@ export const createPatientSchema = z.object({
 			notes: z.string().optional(),
 		})
 		.optional(),
+	emojis: z.string().optional(),
 });
