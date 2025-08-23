@@ -200,7 +200,7 @@ const AddPatientDialog = () => {
 								icon: <Brain className="w-5 h-5" />,
 							},
 							{
-								label: "Functional & Preferences",
+								label: "Preferences",
 								icon: <Pen className="w-5 h-5" />,
 							},
 						]}

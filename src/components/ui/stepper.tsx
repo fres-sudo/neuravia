@@ -32,8 +32,8 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
 								"w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all border-2",
 								{
 									"bg-blue-600 text-white border-blue-600": isCompleted,
-									"bg-white text-blue-600 border-blue-600": isActive,
-									"bg-gray-300 text-gray-500 border-gray-300": isUpcoming,
+									"bg-background text-blue-600 border-blue-600": isActive,
+									"bg-muted text-muted-foreground border-gray-300": isUpcoming,
 								}
 							)}>
 							{isCompleted ? <Check className="w-5 h-5" /> : step.icon}
@@ -45,7 +45,7 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
 								"text-sm mt-2 text-center font-medium transition-all",
 								{
 									"text-blue-600": isCompleted || isActive,
-									"text-gray-400": isUpcoming,
+									"text-muted-foreground": isUpcoming,
 								}
 							)}>
 							{step.label}
@@ -56,7 +56,7 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
 							<div
 								className={clsx("absolute top-5 h-1 z-0 transition-all", {
 									"bg-blue-600": isCompleted,
-									"bg-gray-300": !isCompleted,
+									"bg-muted": !isCompleted,
 								})}
 								style={{
 									left: "50%",
