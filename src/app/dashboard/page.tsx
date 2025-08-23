@@ -18,6 +18,12 @@ import {
 	BarChart3,
 	Images,
 	Copy,
+	Brain,
+	Plus,
+	Activity,
+	TrendingUp,
+	Clock,
+	Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPatientDialog from "../../components/add-patient-dialog";
@@ -58,149 +64,185 @@ export default function Page() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background">
-			<header className="border-b">
-				<div className="container mx-auto px-4 py-4 flex justify-between items-center">
-					<h1 className="text-2xl font-bold">Dashboard</h1>
-					<div className="flex items-center gap-2">
-						<Button
-							onClick={() =>
-								signOut({
-									fetchOptions: {
-										onSuccess: () => {
-											router.replace("/");
+		<div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-slate-800">
+			{/* Header with gradient background */}
+			<header className="bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-lg">
+				<div className="container mx-auto px-4 py-6">
+					<div className="flex justify-between items-center">
+						<div className="flex items-center gap-4">
+							<div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+								<Brain className="w-6 h-6 text-white" />
+							</div>
+							<div>
+								<h1 className="text-3xl font-bold">Boost Dashboard</h1>
+								<p className="text-blue-100 text-sm">Welcome back, {session?.user.name}!</p>
+							</div>
+						</div>
+						<div className="flex items-center gap-3">
+							<Button
+								onClick={() =>
+									signOut({
+										fetchOptions: {
+											onSuccess: () => {
+												router.replace("/");
+											},
 										},
-									},
-								})
-							}
-							variant="outline">
-							Logout
-						</Button>
-						<ModeToggle />
+									})
+								}
+								variant="outline"
+								className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+								Logout
+							</Button>
+							<ModeToggle />
+						</div>
 					</div>
 				</div>
 			</header>
 
 			<main className="container mx-auto px-4 py-8">
-				<div className="max-w-6xl mx-auto space-y-8">
-					{/* User Info Card */}
-					<Card>
-						<CardHeader>
-							<CardTitle>
-								Welcome back, {session?.user.name || session?.user?.email}!
-							</CardTitle>
-							<CardDescription>
-								Manage your family profiles and track your assistance journey
-							</CardDescription>
-						</CardHeader>
+				<div className="max-w-7xl mx-auto space-y-8">
+					{/* Stats Cards */}
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+						<Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm">
+							<CardContent className="p-6">
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-muted-foreground">Total Patients</p>
+										<p className="text-3xl font-bold text-blue-600">
+											{query.data?.length || 0}
+										</p>
+									</div>
+									<div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center">
+										<Users className="w-6 h-6 text-blue-500" />
+									</div>
+								</div>
+							</CardContent>
+						</Card>
 
-						<CardContent>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-								<div>
-									<h3 className="font-semibold text-sm text-muted-foreground">
-										Email
-									</h3>
-									<p className="text-lg">{session?.user?.email}</p>
+						<Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm">
+							<CardContent className="p-6">
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-muted-foreground">Active Sessions</p>
+										<p className="text-3xl font-bold text-green-600">
+											{query.data?.filter(p => hasCurrentWeekDiary(p.diaries)).length || 0}
+										</p>
+									</div>
+									<div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center">
+										<Activity className="w-6 h-6 text-green-500" />
+									</div>
 								</div>
-								<div>
-									<h3 className="font-semibold text-sm text-muted-foreground">
-										Member Since
-									</h3>
-									<p className="text-lg">
-										{session?.user?.createdAt
-											? formatDate(session?.user?.createdAt, "yyyy-MM-dd")
-											: "N/A"}
-									</p>
+							</CardContent>
+						</Card>
+
+						<Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm">
+							<CardContent className="p-6">
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="text-sm font-medium text-muted-foreground">Member Since</p>
+										<p className="text-lg font-semibold text-slate-700">
+											{session?.user?.createdAt
+												? formatDate(session?.user?.createdAt, "MMM yyyy")
+												: "N/A"}
+										</p>
+									</div>
+									<div className="w-12 h-12 bg-slate-500/10 rounded-full flex items-center justify-center">
+										<Clock className="w-6 h-6 text-slate-500" />
+									</div>
 								</div>
-							</div>
-						</CardContent>
-					</Card>
+							</CardContent>
+						</Card>
+					</div>
 
 					{/* Patients Section */}
-					<Card>
-						<CardHeader className="grid grid-cols-[1fr_auto] items-start gap-4 pb-6">
-							<div className="flex flex-col">
-								<CardTitle>Your Patients</CardTitle>
-								<CardDescription>
-									Manage profiles and track development for each patient
-								</CardDescription>
-							</div>
-							<AddPatientDialog />
-						</CardHeader>
-						<CardContent>
-							{query.isLoading ? (
-								<div className="flex items-center justify-center py-8">
-									<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+					<Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+						<CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 border-b border-blue-100/50 rounded-t-lg">
+							<div className="flex justify-between items-center">
+								<div>
+									<CardTitle className="text-2xl text-slate-800 flex items-center gap-3">
+										<div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
+											<Users className="w-5 h-5 text-blue-600" />
+										</div>
+										Your Patients
+									</CardTitle>
+									<CardDescription className="text-slate-600 mt-1">
+										Manage profiles and track development progress for each patient
+									</CardDescription>
 								</div>
-							) : query.data?.length === 0 ? (
-								<div className="text-center py-8">
-									<div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-										<User className="h-6 w-6 text-muted-foreground" />
-									</div>
-									<h3 className="text-lg font-semibold mb-2">
-										No patients added yet
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Start by adding your first patient to begin tracking their
-										development
-									</p>
+								<div className="flex items-center gap-2">
 									<AddPatientDialog />
 								</div>
+							</div>
+						</CardHeader>
+						<CardContent className="p-8">
+							{query.isLoading ? (
+								<div className="flex items-center justify-center py-12">
+									<div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+								</div>
+							) : query.data?.length === 0 ? (
+								<div className="text-center py-16">
+									<div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl flex items-center justify-center mb-6">
+										<User className="h-10 w-10 text-blue-600" />
+									</div>
+									<h3 className="text-xl font-semibold mb-3 text-slate-800">
+										No patients added yet
+									</h3>
+									<p className="text-muted-foreground mb-6 max-w-md mx-auto">
+										Start by adding your first patient to begin tracking their development and progress
+									</p>
+									<Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white shadow-md">
+										<Plus className="w-4 h-4 mr-2" />
+										Add Your First Patient
+									</Button>
+								</div>
 							) : query.data ? (
-								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-									{query.data.map((patient) => (
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{query.data.map((patient) => (
 										<Card
 											key={patient.id}
-											className="relative group hover:shadow-md transition-shadow">
-											<CardContent className="p-6">
-												<Button
-													size="icon"
-													variant="outline"
-													className="absolute top-4 right-4"
-													onClick={() =>
-														router.push(`/patient/${patient.id}/upload`)
-													}>
-													<Images className="h-4 w-4" />
-												</Button>
-												<DeletePatientDialog patientId={patient.id} patientName={patient.name} />
-												<div className="flex items-center space-x-4 mb-4">
-													<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-														<User className="h-6 w-6 text-primary" />
-													</div>
-													<div>
-														<h3 className="font-semibold text-lg">
-															{patient.name}
-														</h3>
-														<p className="text-sm text-muted-foreground">
-															{patient.age} year{patient.age !== 1 ? "s" : ""}{" "}
-															old
-														</p>
+											className="group hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-md hover:scale-[1.02]">
+											<CardContent className="p-6 relative">
+												{/* Action buttons in top right */}
+												<div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+													<Button
+														size="icon"
+														variant="outline"
+														className="h-8 w-8 bg-white/80 hover:bg-blue-50 border-blue-200"
+														onClick={() =>
+															router.push(`/patient/${patient.id}/upload`)
+														}>
+														<Images className="h-3.5 w-3.5 text-blue-600" />
+													</Button>
+													<DeletePatientDialog patientId={patient.id} patientName={patient.name} />
+												</div>
+
+												{/* Patient Info */}
+												<div className="mb-6">
+													<div className="flex items-center space-x-4 mb-4">
+														<div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center shadow-md">
+															<User className="h-7 w-7 text-white" />
+														</div>
+														<div>
+															<h3 className="font-bold text-lg text-slate-800">
+																{patient.name}
+															</h3>
+															<p className="text-sm text-muted-foreground flex items-center gap-1">
+																<Clock className="w-3 h-3" />
+																{patient.age} year{patient.age !== 1 ? "s" : ""} old
+															</p>
+														</div>
 													</div>
 												</div>
 
-												<div className="flex space-x-2">
-													<Link
-														href={`http${
-															process.env.NODE_ENV === "development"
-																? "://localhost:3000"
-																: `s://${process.env.VERCEL_URL}`
-														}/room/${session?.user.id}/${patient.id}`}>
-														<Button
-															size="sm"
-															variant="default"
-															className="flex-1"
-															onClick={() => handleCopyLink(patient.id)}>
-															<Copy className="h-4 w-4 mr-1" />
-															Room Link
-														</Button>
-													</Link>
-													<Link href={`/patient/${patient.id}/settings`}>
-														<Button
-															size="sm"
-															variant="outline">
-															<Settings className="h-4 w-4" />
-														</Button>
-													</Link>
+												{/* Action Buttons */}
+												<div className="grid grid-cols-2 gap-2 mb-3">
+													<Button
+														size="sm"
+														className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-sm"
+														onClick={() => handleCopyLink(patient.id)}>
+														<Copy className="h-3.5 w-3.5 mr-1.5" />
+														Room Link
+													</Button>
+													
 													{(() => {
 														const alreadyDone = hasCurrentWeekDiary(
 															patient.diaries
@@ -210,23 +252,36 @@ export default function Page() {
 															<Link href={`/patient/${patient.id}/diary`}>
 																<Button
 																	size="sm"
-																	disabled={alreadyDone}
-																	className={`flex-1 ${
+																	className={`w-full shadow-sm ${
 																		alreadyDone
-																			? "bg-green-500 hover:bg-green-600 text-white"
-																			: "bg-orange-500 hover:bg-orange-600 text-white"
+																			? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+																			: "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
 																	}`}>
-																	<Notebook className="h-4 w-4 mr-1" />
-																	{alreadyDone ? "Diary done" : "Fill diary"}
+																	<Notebook className="h-3.5 w-3.5 mr-1.5" />
+																	{alreadyDone ? "Diary Done" : "Fill Diary"}
 																</Button>
 															</Link>
 														);
 													})()}
+												</div>
+
+												<div className="grid grid-cols-2 gap-2">
+													<Link href={`/patient/${patient.id}/settings`}>
+														<Button
+															size="sm"
+															variant="outline"
+															className="w-full border-slate-200 hover:bg-slate-50">
+															<Settings className="h-3.5 w-3.5 mr-1.5" />
+															Settings
+														</Button>
+													</Link>
 													<Link href={`/patient/${patient.id}/statistics`}>
 														<Button
 															size="sm"
-															variant="outline">
-															<BarChart3 className="h-4 w-4" />
+															variant="outline"
+															className="w-full border-slate-200 hover:bg-slate-50">
+															<TrendingUp className="h-3.5 w-3.5 mr-1.5" />
+															Stats
 														</Button>
 													</Link>
 												</div>
@@ -235,7 +290,12 @@ export default function Page() {
 									))}
 								</div>
 							) : (
-								<div>Error, try again later</div>
+								<div className="text-center py-12">
+									<div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+										<Activity className="w-8 h-8 text-red-500" />
+									</div>
+									<p className="text-muted-foreground">Error loading patients. Please try again later.</p>
+								</div>
 							)}
 						</CardContent>
 					</Card>

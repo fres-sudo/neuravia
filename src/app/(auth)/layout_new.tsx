@@ -27,13 +27,9 @@ const GoogleIcon = () => (
 	</svg>
 );
 
-// --- TYPE DEFINITIONS ---
-
 interface AuthLayoutProps {
 	children: React.ReactNode;
 }
-
-// --- MAIN COMPONENT ---
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
 	return (
@@ -56,36 +52,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 				</div>
 			</section>
 
-			{/* Right column: hero image with BOOST logo */}
+			{/* Right column: hero image */}
 			<section className="relative hidden flex-1 p-4 md:block">
 				<div
-					className="absolute inset-4 animate-delay-300 animate-slide-right rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-green-600 flex items-center justify-center"
+					className="absolute inset-4 animate-delay-300 animate-slide-right rounded-3xl bg-center bg-cover"
 					style={{
-						backgroundImage: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #16a34a 100%)",
-						backgroundSize: "400% 400%",
-						animation: "gradient-shift 8s ease-in-out infinite"
+						backgroundImage:
+							"url(https://images.unsplash.com/photo-1642615835477-d303d7dc9ee9?w=2160&q=80)",
 					}}
-				>
-					{/* Large BOOST logo in the center */}
-					<div className="flex flex-col items-center justify-center text-white z-10">
-						<div className="w-32 h-32 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 shadow-2xl">
-							<Brain className="w-20 h-20 text-white drop-shadow-lg" />
-						</div>
-						<h1 className="text-6xl font-bold tracking-tight drop-shadow-lg">BOOST</h1>
-						<p className="text-xl font-light mt-2 opacity-90 text-center max-w-sm">
-							Independence means closeness
-						</p>
-					</div>
-					
-					{/* Overlay pattern for visual interest */}
-					<div className="absolute inset-0 opacity-20 bg-gradient-to-tr from-transparent via-white/10 to-white/20 rounded-3xl"></div>
-					
-					{/* Floating elements for visual appeal */}
-					<div className="absolute top-8 left-8 w-16 h-16 bg-white/10 rounded-full blur-md animate-pulse"></div>
-					<div className="absolute top-20 right-16 w-12 h-12 bg-white/15 rounded-full blur-sm animate-pulse delay-1000"></div>
-					<div className="absolute bottom-16 left-12 w-20 h-20 bg-white/8 rounded-full blur-lg animate-pulse delay-2000"></div>
-					<div className="absolute bottom-8 right-8 w-14 h-14 bg-white/12 rounded-full blur-md animate-pulse delay-500"></div>
-				</div>
+				/>
 			</section>
 		</div>
 	);

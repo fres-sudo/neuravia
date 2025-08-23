@@ -2,7 +2,6 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Form,
 	FormControl,
@@ -17,6 +16,7 @@ import { signIn, signUp } from "@/server/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -44,12 +44,6 @@ const registerSchema = z
 				"Password must contain at least one lowercase letter, one uppercase letter, and one number"
 			),
 		confirmPassword: z.string().min(1, "Password confirmation is required"),
-		agreeToTerms: z
-			.boolean()
-			.refine(
-				(val) => val === true,
-				"You must accept the terms of service and privacy policy"
-			),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: "Passwords don't match",
@@ -63,6 +57,7 @@ const RegisterPage = () => {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
 
 	const form = useForm<RegisterFormData>({
 		resolver: zodResolver(registerSchema),
@@ -71,7 +66,6 @@ const RegisterPage = () => {
 			email: "",
 			password: "",
 			confirmPassword: "",
-			agreeToTerms: false,
 		},
 	});
 
@@ -80,18 +74,37 @@ const RegisterPage = () => {
 		setIsLoading(true);
 
 		try {
-			const result = await signUp.email({
+			// First, register the user
+			const signUpResult = await signUp.email({
 				email: data.email,
 				password: data.password,
 				name: data.name,
 				callbackURL: "/dashboard",
 			});
 
-			if (result.error) {
+			if (signUpResult.error) {
 				setError(
-					result.error.message || "An error occurred during registration"
+					signUpResult.error.message || "An error occurred during registration"
 				);
+				return;
 			}
+
+			// If registration is successful, automatically sign in the user
+			const signInResult = await signIn.email({
+				email: data.email,
+				password: data.password,
+				callbackURL: "/dashboard",
+			});
+
+			if (signInResult.error) {
+				// Registration was successful but auto-login failed
+				// Redirect to login page with success message
+				router.push("/login?message=Registration successful! Please sign in.");
+			} else {
+				// Both registration and login successful - redirect to dashboard
+				router.push("/dashboard");
+			}
+
 		} catch (err) {
 			setError("An unexpected error occurred");
 			console.error("Registration error:", err);
@@ -157,7 +170,7 @@ const RegisterPage = () => {
 										{...field}
 										type="text"
 										placeholder="Enter your full name"
-										className="rounded-2xl border-border bg-foreground/5 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10"
+										className="rounded-2xl border-border bg-foreground/5 backdrop-blur-sm focus:border-blue-400/70 focus:bg-blue-500/10"
 										disabled={isLoading || form.formState.isSubmitting}
 									/>
 								</FormControl>
@@ -179,7 +192,7 @@ const RegisterPage = () => {
 										{...field}
 										type="email"
 										placeholder="Enter your email address"
-										className="rounded-2xl border-border bg-foreground/5 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10"
+										className="rounded-2xl border-border bg-foreground/5 backdrop-blur-sm focus:border-blue-400/70 focus:bg-blue-500/10"
 										disabled={isLoading || form.formState.isSubmitting}
 									/>
 								</FormControl>
@@ -202,7 +215,7 @@ const RegisterPage = () => {
 											{...field}
 											type={showPassword ? "text" : "password"}
 											placeholder="Create a secure password"
-											className="rounded-2xl border-border bg-foreground/5 pr-12 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10"
+											className="rounded-2xl border-border bg-foreground/5 pr-12 backdrop-blur-sm focus:border-blue-400/70 focus:bg-blue-500/10"
 											disabled={isLoading || form.formState.isSubmitting}
 										/>
 										<Button
@@ -243,7 +256,7 @@ const RegisterPage = () => {
 											{...field}
 											type={showConfirmPassword ? "text" : "password"}
 											placeholder="Confirm your password"
-											className="rounded-2xl border-border bg-foreground/5 pr-12 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10"
+											className="rounded-2xl border-border bg-foreground/5 pr-12 backdrop-blur-sm focus:border-blue-400/70 focus:bg-blue-500/10"
 											disabled={isLoading || form.formState.isSubmitting}
 										/>
 										<Button
@@ -268,43 +281,10 @@ const RegisterPage = () => {
 						)}
 					/>
 
-					<FormField
-						control={form.control}
-						name="agreeToTerms"
-						render={({ field }) => (
-							<FormItem className="flex animate-delay-700 animate-element flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Checkbox
-										checked={field.value}
-										onCheckedChange={field.onChange}
-										disabled={isLoading || form.formState.isSubmitting}
-									/>
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel className="cursor-pointer font-normal text-foreground/90 text-sm leading-relaxed">
-										I accept the{" "}
-										<Link
-											href="#"
-											className="text-violet-400 transition-colors hover:underline">
-											Terms of Service
-										</Link>{" "}
-										and the{" "}
-										<Link
-											href="#"
-											className="text-violet-400 transition-colors hover:underline">
-											Privacy Policy
-										</Link>
-									</FormLabel>
-									<FormMessage />
-								</div>
-							</FormItem>
-						)}
-					/>
-
 					<Button
 						type="submit"
 						disabled={isLoading || form.formState.isSubmitting}
-						className="w-full animate-delay-800 animate-element rounded-2xl py-6 font-medium">
+						className="w-full animate-delay-700 animate-element rounded-2xl py-6 font-medium">
 						{isLoading || form.formState.isSubmitting
 							? "Creating account..."
 							: "Create Account"}
@@ -332,7 +312,7 @@ const RegisterPage = () => {
 				Already have an account?{" "}
 				<Link
 					href="/login"
-					className="text-violet-400 transition-colors hover:underline">
+					className="text-blue-400 transition-colors hover:underline">
 					Log in
 				</Link>
 			</p>
