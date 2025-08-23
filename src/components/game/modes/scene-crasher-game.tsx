@@ -27,7 +27,7 @@ export const SceneCrasherGame = () => {
 		if (phase === "memorize") {
 			// Generate N identical items in random positions
 			const itemCount = gameSettings.itemCount;
-			const items = [];
+			const items: { id: number; icon: string; x: number; y: number }[] = [];
 
 			for (let i = 0; i < itemCount; i++) {
 				items.push({

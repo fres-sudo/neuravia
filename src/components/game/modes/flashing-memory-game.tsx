@@ -112,7 +112,7 @@ export const FlashingMemoryGame = () => {
 	};
 
 	const renderGrid = () => {
-		const cells = [];
+		const cells: React.JSX.Element[] = [];
 		for (let i = 0; i < 9; i++) {
 			const sequenceItem = sequence.find(
 				(item) => item.position === i
