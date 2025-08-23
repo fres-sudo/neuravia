@@ -8,8 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-	title: "Neuravia",
-	description: "A platform for exploring the neural architecture search space.",
+	title: "Boost - Cognitive Care Platform",
+	description: "Transform Alzheimer's care with precision tracking through scientifically validated cognitive games.",
 	icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
