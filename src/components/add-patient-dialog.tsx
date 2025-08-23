@@ -11,7 +11,6 @@ import { Stepper } from "@/components/ui/stepper";
 import { Brain, User, Pen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { api } from "@/trpc/react";
 import { createPatientSchema } from "@/server/db/zod";
 import {
 	Dialog,
@@ -29,6 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "./ui/select";
+import { api } from "@/trpc/react";
 
 type Step = 1 | 2 | 3;
 
@@ -54,9 +54,12 @@ const PASSION_OPTIONS = [
 const AddPatientDialog = () => {
 	const [step, setStep] = useState<Step>(1);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [open, setOpen] = useState(false);
+
 	const router = useRouter();
 
 	const createPatientMutation = api.patitents.create.useMutation();
+	const utils = api.useUtils();
 
 	const form = useForm<CreatePatientForm>({
 		resolver: zodResolver(createPatientSchema),
@@ -150,6 +153,8 @@ const AddPatientDialog = () => {
 			};
 
 			await createPatientMutation.mutateAsync(transformedData);
+			await utils.patitents.fetch.invalidate();
+			setOpen(false);
 			toast.success(`Success, ${transformedData.name} added!`);
 			router.push("/dashboard");
 		} catch (err: any) {
@@ -175,7 +180,9 @@ const AddPatientDialog = () => {
 	};
 
 	return (
-		<Dialog>
+		<Dialog
+			open={open}
+			onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button>
 					<Plus className="h-4 w-4" />
