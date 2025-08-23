@@ -177,7 +177,6 @@ const AddPatientDialog = () => {
 
 			await createPatientMutation.mutateAsync(payload);
 			await utils.patients.fetch.invalidate();
-			await utils.patients.
 			setOpen(false);
 			toast.success(`Success, ${transformedData.name} added!`);
 			router.push("/dashboard");
