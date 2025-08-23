@@ -4,10 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Brain, Menu, X } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "@/server/auth/auth-client";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +28,14 @@ const Navbar = () => {
       element.scrollIntoView({ behavior: "smooth" });
     }
     setIsMenuOpen(false);
+  };
+
+  const handleAuthClick = () => {
+    if (session?.user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
+    }
   };
 
   const navItems = [
@@ -60,11 +72,9 @@ const Navbar = () => {
                 {item.label}
               </button>
             ))}
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Login
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" onClick={handleAuthClick}>
+              {session?.user ? "Dashboard" : "Login"}
+            </Button>
             <Link href="/register">
               <Button size="sm">
                 Get Started
@@ -99,11 +109,9 @@ const Navbar = () => {
                 </button>
               ))}
               <div className="px-4 space-y-2">
-                <Link href="/login" className="block w-full">
-                  <Button variant="outline" size="sm" className="w-full">
-                    Login
-                  </Button>
-                </Link>
+                <Button variant="outline" size="sm" className="w-full" onClick={handleAuthClick}>
+                  {session?.user ? "Dashboard" : "Login"}
+                </Button>
                 <Link href="/register" className="block w-full">
                   <Button size="sm" className="w-full">
                     Get Started

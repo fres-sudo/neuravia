@@ -3,7 +3,7 @@ import { Brain, Mail, Phone, MapPin } from "lucide-react";
 const Footer = () => {
 	return (
 		<footer className="bg-card border-t border-border">
-			<div className="container mx-auto px-4 py-12">
+			<div className="max-w-6xl mx-auto px-4 py-12">
 				<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
 					<div className="space-y-4">
 						<div className="flex items-center gap-2">
@@ -86,31 +86,6 @@ const Footer = () => {
 							</li>
 						</ul>
 					</div>
-
-					<div className="space-y-4">
-						<h4 className="font-semibold">Contact</h4>
-						<div className="space-y-3 text-sm">
-							<div className="flex items-center gap-2 text-muted-foreground">
-								<Mail className="w-4 h-4" />
-								<span>support@alzheimcare.com</span>
-							</div>
-							<div className="flex items-center gap-2 text-muted-foreground">
-								<Phone className="w-4 h-4" />
-								<span>1-800-CARE-NOW</span>
-							</div>
-							<div className="flex items-center gap-2 text-muted-foreground">
-								<MapPin className="w-4 h-4" />
-								<span>Available nationwide</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div className="border-t border-border mt-8 pt-8 text-center">
-					<p className="text-sm text-muted-foreground">
-						© 2024 AlzheimCare. All rights reserved. | HIPAA Compliant | FDA
-						Registered
-					</p>
 				</div>
 			</div>
 		</footer>

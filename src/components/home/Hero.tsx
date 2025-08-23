@@ -1,8 +1,23 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brain, Heart } from "lucide-react";
 import Image from "next/image";
+import { useSession } from "@/server/auth/auth-client";
+import { useRouter } from "next/navigation";
 
 const Hero = () => {
+	const { data: session } = useSession();
+	const router = useRouter();
+
+	const handleGetStarted = () => {
+		if (session?.user) {
+			router.push("/dashboard");
+		} else {
+			router.push("/register");
+		}
+	};
+
 	return (
 		<section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden pt-16">
 			<div className="container mx-auto px-4 py-20">
@@ -30,26 +45,11 @@ const Hero = () => {
 						<div className="flex flex-col sm:flex-row gap-4">
 							<Button
 								variant={"hero"}
-								className="group">
-								Start Free Assessment
+								className="group"
+								onClick={handleGetStarted}>
+								{session?.user ? "Go to Dashboard" : "Get Started Now"}
 								<ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
 							</Button>
-							<Button variant="outline">Watch Demo</Button>
-						</div>
-
-						<div className="flex items-center gap-8 pt-4">
-							<div className="flex items-center gap-2">
-								<Heart className="w-5 h-5 text-accent fill-accent" />
-								<span className="text-sm text-foreground">
-									Trusted by 10,000+ families
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 bg-accent rounded-full"></div>
-								<span className="text-sm text-foreground">
-									FDA-compliant design
-								</span>
-							</div>
 						</div>
 					</div>
 
