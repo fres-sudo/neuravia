@@ -11,14 +11,7 @@ import { hasCurrentWeekDiary } from "@/lib/utils";
 import { signOut, useSession } from "@/server/auth/auth-client";
 import { api } from "@/trpc/react";
 import { formatDate } from "date-fns";
-import {
-	Plus,
-	User,
-	Settings,
-	Notebook,
-	BarChart3,
-	Images,
-} from "lucide-react";
+import { User, Settings, Notebook, BarChart3, Images } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPatientDialog from "../../components/add-patient-dialog";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -89,16 +82,15 @@ export default function Page() {
 
 					{/* Patients Section */}
 					<Card>
-						<div className="flex items-center justify-between">
-							<CardHeader className="flex flex-col pb-6">
+						<CardHeader className="grid grid-cols-[1fr_auto] items-start gap-4 pb-6">
+							<div className="flex flex-col">
 								<CardTitle>Your Patients</CardTitle>
 								<CardDescription>
 									Manage profiles and track development for each patient
 								</CardDescription>
-							</CardHeader>
+							</div>
 							<AddPatientDialog />
-						</div>
-
+						</CardHeader>
 						<CardContent>
 							{query.isLoading ? (
 								<div className="flex items-center justify-center py-8">
@@ -116,10 +108,7 @@ export default function Page() {
 										Start by adding your first patient to begin tracking their
 										development
 									</p>
-									<Button onClick={() => router.push("/add-patient")}>
-										<Plus className="h-4 w-4 mr-2" />
-										Add Your First Patient
-									</Button>
+									<AddPatientDialog />
 								</div>
 							) : query.data ? (
 								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
