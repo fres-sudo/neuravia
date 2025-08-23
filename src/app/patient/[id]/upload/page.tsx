@@ -155,7 +155,7 @@ export default function Page() {
                             {/* Meta + Results */}
                             <div className="flex-1 space-y-4">
                               <div className="flex items-center justify-between">
-                                <p className="text-sm text-muted-foreground">{formatDate(img.uploadedAt)}</p>
+                                <p className="text-sm text-muted-foreground">{img.uploadedAt ? formatDate(img.uploadedAt) : "Unknown date"}</p>
                                 {results?.predicted_label && (
                                   <Badge className={labelClass(results.predicted_label)}>
                                     {results.predicted_label.replaceAll("_", " ")}
