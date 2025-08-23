@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import AddPatientDialog from "../../components/add-patient-dialog";
 import { ModeToggle } from "@/components/mode-toggle";
 export default function Page() {
-	const query = api.patitents.fetch.useQuery();
+	const query = api.patients.fetch.useQuery();
 
 	const { data: session } = useSession();
 	const router = useRouter();

@@ -58,7 +58,7 @@ const AddPatientDialog = () => {
 
 	const router = useRouter();
 
-	const createPatientMutation = api.patitents.create.useMutation();
+	const createPatientMutation = api.patients.create.useMutation();
 	const utils = api.useUtils();
 
 	const form = useForm<CreatePatientForm>({
@@ -153,7 +153,7 @@ const AddPatientDialog = () => {
 			};
 
 			await createPatientMutation.mutateAsync(transformedData);
-			await utils.patitents.fetch.invalidate();
+			await utils.patients.fetch.invalidate();
 			setOpen(false);
 			toast.success(`Success, ${transformedData.name} added!`);
 			router.push("/dashboard");
