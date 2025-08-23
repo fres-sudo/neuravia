@@ -30,6 +30,7 @@ import {
 	SelectValue,
 } from "./ui/select";
 import { api } from "@/trpc/react";
+import {BoostScoreService} from "@/scoring/service";
 
 type Step = 1 | 2 | 3;
 
@@ -52,6 +53,8 @@ const PASSION_OPTIONS = [
 	{ value: "other", label: "Other" },
 ] as const;
 
+const boostService = new BoostScoreService();
+
 const AddPatientDialog = () => {
 	const [step, setStep] = useState<Step>(1);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,6 +63,7 @@ const AddPatientDialog = () => {
 	const router = useRouter();
 
 	const createPatientMutation = api.patients.create.useMutation();
+	const insertScoreMutation = api.scoring.insert.useMutation();
 	const utils = api.useUtils();
 
 	const form = useForm<CreatePatientForm>({
@@ -170,12 +174,30 @@ const AddPatientDialog = () => {
 			  }
 			}
 
+			// Calculate initial score
+			const activityValue = await boostService.calculateInitialAssessment(transformedData.initialInfo);
+			
 			const payload = {
 			  ...transformedData,
 			  emojis: JSON.stringify(emojis),
 			};
 
-			await createPatientMutation.mutateAsync(payload);
+			// Create the patient first
+			const createdPatient = await createPatientMutation.mutateAsync(payload);
+			
+			// Prepare and insert the initial score
+			const scoreData = boostService.prepareScoreData({
+				patientId: createdPatient.id,
+				activityType: 'initial_assessment',
+				activityValue: activityValue,
+				previousScore: 0,
+				metadata: {
+					assessmentData: transformedData.initialInfo,
+				},
+			});
+
+			await insertScoreMutation.mutateAsync(scoreData);
+
 			await utils.patients.fetch.invalidate();
 			setOpen(false);
 			toast.success(`Success, ${transformedData.name} added!`);
