@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft } from "lucide-react";
 import { formatDate, labelClass } from "@/lib/utils";
+import { BoostScoreService } from "@/scoring/service";
+import { toast } from "sonner";
 
 type InferenceResult = {
   predicted_label: string;
@@ -49,6 +51,8 @@ export default function Page() {
   );
 
   const uploadMutation = api.images.uploadAndProcess.useMutation();
+  const insertScoreMutation = api.scoring.insertWithPreviousScore.useMutation();
+  const boostService = new BoostScoreService();
 
   const handleUploadAndProcess = async () => {
     if (!patientId || files.length === 0) return;
@@ -67,7 +71,34 @@ export default function Page() {
         })
       );
 
-      await uploadMutation.mutateAsync({ patientId, files: base64Files });
+      const uploadResult = await uploadMutation.mutateAsync({ patientId, files: base64Files });
+
+      // Calculate and insert scores for each processed image
+      if (uploadResult && Array.isArray(uploadResult)) {
+        for (const image of uploadResult) {
+          if (image.results) {
+            const results = image.results as InferenceResult;
+            
+            // Calculate MRI score from probabilities
+            const activityValue = await boostService.calculateMriUpload(results);
+            
+            // Insert the score with automatic previous score calculation
+            await insertScoreMutation.mutateAsync({
+              patientId: patientId,
+              activityType: 'mri_upload',
+              activityValue: activityValue,
+              metadata: {
+                imageId: image.id,
+                filename: image.filename,
+                mriResults: results,
+                uploadedAt: image.uploadedAt,
+              },
+            });
+            
+            toast.success(`MRI score calculated: ${activityValue.toFixed(1)}`);
+          }
+        }
+      }
 
       setFiles([]);
       await imagesQuery.refetch();
