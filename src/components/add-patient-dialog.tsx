@@ -66,7 +66,7 @@ const AddPatientDialog = () => {
 		resolver: zodResolver(createPatientSchema),
 		defaultValues: {
 			name: "",
-			age: 0,
+			age: undefined,
 			gender: undefined,
 			educationLevel: "",
 			job: undefined,
@@ -76,11 +76,11 @@ const AddPatientDialog = () => {
 				otherConditions: [],
 				medications: [],
 				cognitiveAndFunctional: {
-					memoryShortTerm: 3,
-					orientation: 3,
-					language: 3,
-					dailyActivities: 3,
-					moodBehavior: 3,
+					memoryShortTerm: undefined,
+					orientation: undefined,
+					language: undefined,
+					dailyActivities: undefined,
+					moodBehavior: undefined,
 				},
 				biggestPassion: undefined,
 				notes: "",
@@ -178,7 +178,15 @@ const AddPatientDialog = () => {
 			await createPatientMutation.mutateAsync(payload);
 			await utils.patients.fetch.invalidate();
 			setOpen(false);
-			toast.success(`Success, ${transformedData.name} added!`);
+			toast.success(`✅ Patient Successfully Added!\n\n${transformedData.name} has been added to your dashboard. Share the room link with family members so they can join and start playing.`, {
+				duration: 5000,
+				style: {
+					fontSize: '16px',
+					padding: '20px',
+					minWidth: '400px',
+					maxWidth: '500px'
+				}
+			});
 			router.push("/dashboard");
 		} catch (err: any) {
 			toast.error(err.message);
@@ -214,7 +222,7 @@ const AddPatientDialog = () => {
 			</DialogTrigger>
 
 			<form onSubmit={handleSubmit(onSubmit)}>
-				<DialogContent>
+				<DialogContent className="max-h-[90vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>Step {step}</DialogTitle>
 						<DialogDescription>
@@ -230,12 +238,12 @@ const AddPatientDialog = () => {
 								icon: <Brain className="w-5 h-5" />,
 							},
 							{
-								label: "Preferences",
+								label: "Assessment Scores",
 								icon: <Pen className="w-5 h-5" />,
 							},
 						]}
 					/>
-					<div className="space-y-6">
+					<div className="space-y-6 max-h-[60vh] overflow-y-auto px-1">
 						{step === 1 && (
 							<div className="space-y-4">
 								<div className="space-y-2">
@@ -267,7 +275,11 @@ const AddPatientDialog = () => {
 												{...field}
 												type="number"
 												placeholder="Enter age"
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value || ''}
+												onChange={(e) => {
+													const value = e.target.value;
+													field.onChange(value === '' ? undefined : Number(value));
+												}}
 											/>
 										)}
 									/>
@@ -436,6 +448,21 @@ const AddPatientDialog = () => {
 
 						{step === 3 && (
 							<div className="space-y-4">
+								{/* Instructions for scoring */}
+								<div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+									<h4 className="font-semibold text-blue-900 mb-2">Assessment Scoring Guide</h4>
+									<p className="text-sm text-blue-800 mb-2">
+										Please rate each cognitive area using the following scale:
+									</p>
+									<div className="text-xs text-blue-700 space-y-1">
+										<div><strong>5:</strong> Excellent - No difficulties, performs independently</div>
+										<div><strong>4:</strong> Good - Minor difficulties, mostly independent</div>
+										<div><strong>3:</strong> Average - Moderate difficulties, needs some assistance</div>
+										<div><strong>2:</strong> Poor - Significant difficulties, needs frequent help</div>
+										<div><strong>1:</strong> Very Poor - Severe difficulties, needs constant assistance</div>
+									</div>
+								</div>
+
 								<div className="space-y-2">
 									<Label>Memory Short-Term (1-5)</Label>
 									<Controller
@@ -447,7 +474,11 @@ const AddPatientDialog = () => {
 												type="number"
 												min={1}
 												max={5}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value || ''}
+												onChange={(e) => {
+													const value = e.target.value;
+													field.onChange(value === '' ? undefined : Number(value));
+												}}
 											/>
 										)}
 									/>
@@ -473,7 +504,11 @@ const AddPatientDialog = () => {
 												type="number"
 												min={1}
 												max={5}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value || ''}
+												onChange={(e) => {
+													const value = e.target.value;
+													field.onChange(value === '' ? undefined : Number(value));
+												}}
 											/>
 										)}
 									/>
@@ -498,7 +533,11 @@ const AddPatientDialog = () => {
 												type="number"
 												min={1}
 												max={5}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value || ''}
+												onChange={(e) => {
+													const value = e.target.value;
+													field.onChange(value === '' ? undefined : Number(value));
+												}}
 											/>
 										)}
 									/>
@@ -523,7 +562,11 @@ const AddPatientDialog = () => {
 												type="number"
 												min={1}
 												max={5}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value || ''}
+												onChange={(e) => {
+													const value = e.target.value;
+													field.onChange(value === '' ? undefined : Number(value));
+												}}
 											/>
 										)}
 									/>
@@ -549,7 +592,11 @@ const AddPatientDialog = () => {
 												type="number"
 												min={1}
 												max={5}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												value={field.value || ''}
+												onChange={(e) => {
+													const value = e.target.value;
+													field.onChange(value === '' ? undefined : Number(value));
+												}}
 											/>
 										)}
 									/>

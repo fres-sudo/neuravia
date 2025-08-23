@@ -28,7 +28,6 @@ import {
 import { useRouter } from "next/navigation";
 import AddPatientDialog from "../../components/add-patient-dialog";
 import DeletePatientDialog from "../../components/delete-patient-dialog";
-import { ModeToggle } from "@/components/mode-toggle";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -66,7 +65,7 @@ export default function Page() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-slate-800">
 			{/* Header with gradient background */}
-			<header className="bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-lg">
+			<header className="bg-gradient-to-r from-blue-400/80 to-green-400/80 text-white shadow-lg backdrop-blur-sm">
 				<div className="container mx-auto px-4 py-6">
 					<div className="flex justify-between items-center">
 						<div className="flex items-center gap-4">
@@ -93,7 +92,6 @@ export default function Page() {
 								className="bg-white/10 border-white/20 text-white hover:bg-white/20">
 								Logout
 							</Button>
-							<ModeToggle />
 						</div>
 					</div>
 				</div>
@@ -108,12 +106,12 @@ export default function Page() {
 								<div className="flex items-center justify-between">
 									<div>
 										<p className="text-sm font-medium text-muted-foreground">Total Patients</p>
-										<p className="text-3xl font-bold text-blue-600">
+										<p className="text-3xl font-bold text-slate-900">
 											{query.data?.length || 0}
 										</p>
 									</div>
-									<div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center">
-										<Users className="w-6 h-6 text-blue-500" />
+									<div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+										<Users className="w-6 h-6 text-slate-700" />
 									</div>
 								</div>
 							</CardContent>
@@ -124,12 +122,11 @@ export default function Page() {
 								<div className="flex items-center justify-between">
 									<div>
 										<p className="text-sm font-medium text-muted-foreground">Active Sessions</p>
-										<p className="text-3xl font-bold text-green-600">
-											{query.data?.filter(p => hasCurrentWeekDiary(p.diaries)).length || 0}
+										<p className="text-3xl font-bold text-slate-900">{query.data?.filter(p => hasCurrentWeekDiary(p.diaries)).length || 0}
 										</p>
 									</div>
-									<div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center">
-										<Activity className="w-6 h-6 text-green-500" />
+									<div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+										<Activity className="w-6 h-6 text-slate-700" />
 									</div>
 								</div>
 							</CardContent>
@@ -160,8 +157,8 @@ export default function Page() {
 							<div className="flex justify-between items-center">
 								<div>
 									<CardTitle className="text-2xl text-slate-800 flex items-center gap-3">
-										<div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
-											<Users className="w-5 h-5 text-blue-600" />
+										<div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+											<Users className="w-5 h-5 text-slate-700" />
 										</div>
 										Your Patients
 									</CardTitle>
@@ -181,8 +178,8 @@ export default function Page() {
 								</div>
 							) : query.data?.length === 0 ? (
 								<div className="text-center py-16">
-									<div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl flex items-center justify-center mb-6">
-										<User className="h-10 w-10 text-blue-600" />
+									<div className="mx-auto w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mb-6">
+										<User className="h-10 w-10 text-slate-700" />
 									</div>
 									<h3 className="text-xl font-semibold mb-3 text-slate-800">
 										No patients added yet
@@ -190,10 +187,7 @@ export default function Page() {
 									<p className="text-muted-foreground mb-6 max-w-md mx-auto">
 										Start by adding your first patient to begin tracking their development and progress
 									</p>
-									<Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white shadow-md">
-										<Plus className="w-4 h-4 mr-2" />
-										Add Your First Patient
-									</Button>
+									<AddPatientDialog />
 								</div>
 							) : query.data ? (
 								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{query.data.map((patient) => (
