@@ -86,7 +86,7 @@ const Hero = () => {
 								size="lg"
 								className="group bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
 								onClick={handleGetStarted}>
-								{session?.user ? "Go to Dashboard" : "Sign Up"}
+								{session?.user ? "Go to Dashboard" : "Start Free Trial"}
 								<ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
 							</Button>
 							<Button

@@ -93,7 +93,7 @@ const Navbar = () => {
                 size="sm" 
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
-                Sign Up
+                Get Started
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -140,7 +140,7 @@ const Navbar = () => {
                     size="lg" 
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold group"
                   >
-                    Sign Up
+                    Get Started
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
