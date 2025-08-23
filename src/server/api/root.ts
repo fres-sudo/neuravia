@@ -1,7 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { careGiverRouter } from "./routers/care-giver.router";
-import { patientsRouter } from "./routers/patitents.router";
 import { imagesRouter } from "./routers/images.router";
+import { patientsRouter } from "./routers/patients.router";
 
 /**
  * This is the primary router for your server.

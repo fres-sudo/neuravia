@@ -87,7 +87,6 @@ export const patients = sqliteTable(
 		caregiverId: text("caregiver_id").notNull(),
 		name: text("name").notNull(),
 		age: integer("age").notNull(),
-		personalityDescription: text("personality_description"),
 		job: text("job", { mode: "json" }), // JSON column for job object
 		initialInfo: text("initial_info", { mode: "json" }), // JSON column
 		lastActiveAt: text("last_active_at"),

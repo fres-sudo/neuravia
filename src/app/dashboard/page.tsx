@@ -14,7 +14,7 @@ import { formatDate } from "date-fns";
 import {Plus, User, Settings, Notebook, BarChart3, Images} from "lucide-react";
 import { useRouter } from "next/navigation";
 export default function Page() {
-	const query = api.patitents.getPatients.useQuery();
+	const query = api.patitents.fetch.useQuery();
 
 	const { data: session } = useSession();
 	const router = useRouter();
@@ -86,7 +86,7 @@ export default function Page() {
 								</CardDescription>
 							</div>
 							<Button
-								onClick={() => router.push("/add-patient")}
+								onClick={() => router.push("/dashbaord/add-patient")}
 								className="flex items-center gap-2">
 								<Plus className="h-4 w-4" />
 								Add Patient

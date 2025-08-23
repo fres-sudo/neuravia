@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/server/auth/auth";
+import { headers } from "next/headers";
 
 const publicRoutes = ["/", "/login", "/register"];
 
@@ -13,7 +14,7 @@ export async function middleware(request: NextRequest) {
 
 	// Check authentication
 	const session = await auth.api.getSession({
-		headers: request.headers,
+		headers: await headers(),
 	});
 
 	// If not authenticated, redirect to login
@@ -26,4 +27,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
 	matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
+	runtime: "nodejs",
 };

@@ -9,10 +9,8 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-
 import { db } from "@/server/db";
 import { auth } from "../auth/auth";
-import { headers } from "next/headers";
 
 /**
  * 1. CONTEXT
@@ -27,8 +25,9 @@ import { headers } from "next/headers";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+	// Get the session using the headers passed from the API route
 	const session = await auth.api.getSession({
-		headers: await headers(),
+		headers: opts.headers,
 	});
 
 	return {
@@ -96,7 +95,6 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 	}
 
 	const result = await next();
-
 	const end = Date.now();
 	console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
 
@@ -111,9 +109,11 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
 export const protectedProcedure = t.procedure
 	.use(timingMiddleware)
 	.use(({ ctx, next }) => {
+		// Use the session that was already retrieved in createTRPCContext
 		if (!ctx.session || !ctx.session.user) {
 			throw new TRPCError({ code: "UNAUTHORIZED" });
 		}
