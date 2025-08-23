@@ -22,6 +22,13 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "./ui/select";
 
 type Step = 1 | 2 | 3;
 
@@ -245,15 +252,18 @@ const AddPatientDialog = () => {
 										name="gender"
 										control={control}
 										render={({ field }) => (
-											<select
-												{...field}
-												className="border p-2 rounded w-full"
-												value={field.value || ""}>
-												<option value="">-- Select --</option>
-												<option value="male">Male</option>
-												<option value="female">Female</option>
-												<option value="other">Other</option>
-											</select>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}>
+												<SelectTrigger className="w-full">
+													<SelectValue placeholder="Select a gender" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="male">Male</SelectItem>
+													<SelectItem value="female">Female</SelectItem>
+													<SelectItem value="other">Other</SelectItem>
+												</SelectContent>
+											</Select>
 										)}
 									/>
 								</div>
@@ -278,19 +288,22 @@ const AddPatientDialog = () => {
 										name="job.type"
 										control={control}
 										render={({ field }) => (
-											<select
-												{...field}
-												className="border p-2 rounded w-full"
-												value={field.value || ""}>
-												<option value="">-- Select --</option>
-												{JOB_OPTIONS.map((option) => (
-													<option
-														key={option.value}
-														value={option.value}>
-														{option.label}
-													</option>
-												))}
-											</select>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}>
+												<SelectTrigger className="w-full">
+													<SelectValue placeholder="Select a gender" />
+												</SelectTrigger>
+												<SelectContent>
+													{JOB_OPTIONS.map((option) => (
+														<SelectItem
+															key={option.value}
+															value={option.value}>
+															{option.label}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
 										)}
 									/>
 									{watchedJob?.type === "other" && (
@@ -317,15 +330,18 @@ const AddPatientDialog = () => {
 										name="initialInfo.diagnosis"
 										control={control}
 										render={({ field }) => (
-											<select
-												{...field}
-												className="border p-2 rounded w-full"
-												value={field.value || ""}>
-												<option value="">-- Select --</option>
-												<option value="none">None</option>
-												<option value="suspected">Suspected</option>
-												<option value="confirmed">Confirmed</option>
-											</select>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}>
+												<SelectTrigger className="w-full">
+													<SelectValue placeholder="Select a gender" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="none">None</SelectItem>
+													<SelectItem value="suspected">Suspected</SelectItem>
+													<SelectItem value="confirmed">Confirmed</SelectItem>
+												</SelectContent>
+											</Select>
 										)}
 									/>
 								</div>
@@ -336,15 +352,18 @@ const AddPatientDialog = () => {
 										name="initialInfo.stage"
 										control={control}
 										render={({ field }) => (
-											<select
-												{...field}
-												className="border p-2 rounded w-full"
-												value={field.value || ""}>
-												<option value="">-- Select --</option>
-												<option value="mild">Mild</option>
-												<option value="moderate">Moderate</option>
-												<option value="severe">Severe</option>
-											</select>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}>
+												<SelectTrigger className="w-full">
+													<SelectValue placeholder="Select a gender" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="mild">Mild</SelectItem>
+													<SelectItem value="moderate">Moderate</SelectItem>
+													<SelectItem value="severe">Severe</SelectItem>
+												</SelectContent>
+											</Select>
 										)}
 									/>
 								</div>
@@ -520,19 +539,22 @@ const AddPatientDialog = () => {
 										name="initialInfo.biggestPassion.type"
 										control={control}
 										render={({ field }) => (
-											<select
-												{...field}
-												className="border p-2 rounded w-full"
-												value={field.value || ""}>
-												<option value="">-- Select --</option>
-												{PASSION_OPTIONS.map((option) => (
-													<option
-														key={option.value}
-														value={option.value}>
-														{option.label}
-													</option>
-												))}
-											</select>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}>
+												<SelectTrigger className="w-full">
+													<SelectValue placeholder="Select a gender" />
+												</SelectTrigger>
+												<SelectContent>
+													{PASSION_OPTIONS.map((option) => (
+														<SelectItem
+															key={option.value}
+															value={option.value}>
+															{option.label}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
 										)}
 									/>
 									{watchedBiggestPassion?.type === "other" && (
