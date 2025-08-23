@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -6,7 +6,8 @@ const GoogleIcon = () => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		className="h-5 w-5"
-		viewBox="0 0 48 48">
+		viewBox="0 0 48 48"
+	>
 		<path
 			fill="#FFC107"
 			d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s12-5.373 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-2.641-.21-5.236-.611-7.743z"
@@ -49,10 +50,11 @@ const TestimonialCard = ({
 	delay: string;
 }) => (
 	<div
-		className={`animate-testimonial ${delay} flex items-start gap-3 rounded-3xl bg-card/40 dark:bg-zinc-800/40 backdrop-blur-xl border border-white/10 p-5 w-64`}>
+		className={`animate-testimonial ${delay} flex w-64 items-start gap-3 rounded-3xl border border-white/10 bg-card/40 p-5 backdrop-blur-xl dark:bg-zinc-800/40`}
+	>
 		<img
 			src={testimonial.avatarSrc}
-			className="h-10 w-10 object-cover rounded-2xl"
+			className="h-10 w-10 rounded-2xl object-cover"
 			alt="avatar"
 		/>
 		<div className="text-sm leading-snug">
@@ -88,21 +90,22 @@ const sampleTestimonials: Testimonial[] = [
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
 	return (
-		<div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw] bg-background text-foreground">
+		<div className="flex h-[100dvh] w-[100dvw] flex-col bg-background font-geist text-foreground md:flex-row">
 			{/* Left column: form content */}
-			<section className="flex-1 flex flex-col p-8">
+			<section className="flex flex-1 flex-col p-8">
 				<div className="mb-8">
 					<div className="flex items-center">
 						<svg
 							className="h-8 w-8 text-primary"
 							viewBox="0 0 24 24"
-							fill="currentColor">
-							<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+							fill="currentColor"
+						>
+							<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
 						</svg>
-						<span className="ml-2 text-xl font-bold">Vitalis</span>
+						<span className="ml-2 font-bold text-xl">Vitalis</span>
 					</div>
 				</div>
-				<div className="flex-1 flex items-center justify-center">
+				<div className="flex flex-1 items-center justify-center">
 					<div className="w-full max-w-md">
 						{/* Children (login-form or register-form) will be rendered here */}
 						{children}
@@ -111,13 +114,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 			</section>
 
 			{/* Right column: hero image + testimonials */}
-			<section className="hidden md:block flex-1 relative p-4">
+			<section className="relative hidden flex-1 p-4 md:block">
 				<div
-					className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center"
+					className="absolute inset-4 animate-delay-300 animate-slide-right rounded-3xl bg-center bg-cover"
 					style={{
-						backgroundImage: `url(https://images.unsplash.com/photo-1642615835477-d303d7dc9ee9?w=2160&q=80)`,
-					}}></div>
-				<div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
+						backgroundImage:
+							"url(https://images.unsplash.com/photo-1642615835477-d303d7dc9ee9?w=2160&q=80)",
+					}}
+				/>
+				<div className="-translate-x-1/2 absolute bottom-8 left-1/2 flex w-full justify-center gap-4 px-8">
 					<TestimonialCard
 						testimonial={sampleTestimonials[0]!}
 						delay="animate-delay-1000"

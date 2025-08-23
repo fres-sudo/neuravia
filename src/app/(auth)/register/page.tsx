@@ -1,14 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Form,
 	FormControl,
@@ -18,9 +12,15 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import Link from "next/link";
-import { GoogleIcon } from "../layout";
+import { Input } from "@/components/ui/input";
 import { authClient } from "@/server/auth/auth-client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { GoogleIcon } from "../layout";
 
 // Zod schema with English error messages
 const registerSchema = z
@@ -32,7 +32,7 @@ const registerSchema = z
 			.max(50, "Name cannot exceed 50 characters")
 			.regex(
 				/^[a-zA-ZÀ-ÿ\s'.-]+$/,
-				"Name can only contain letters, spaces and apostrophes"
+				"Name can only contain letters, spaces and apostrophes",
 			),
 		email: z.email("Enter a valid email address"),
 		password: z
@@ -41,14 +41,14 @@ const registerSchema = z
 			.min(8, "Password must contain at least 8 characters")
 			.regex(
 				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-				"Password must contain at least one lowercase letter, one uppercase letter, and one number"
+				"Password must contain at least one lowercase letter, one uppercase letter, and one number",
 			),
 		confirmPassword: z.string().min(1, "Password confirmation is required"),
 		agreeToTerms: z
 			.boolean()
 			.refine(
 				(val) => val === true,
-				"You must accept the terms of service and privacy policy"
+				"You must accept the terms of service and privacy policy",
 			),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
@@ -58,7 +58,7 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-export const RegisterPage = () => {
+const RegisterPage = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -89,7 +89,7 @@ export const RegisterPage = () => {
 
 			if (result.error) {
 				setError(
-					result.error.message || "An error occurred during registration"
+					result.error.message || "An error occurred during registration",
 				);
 			}
 		} catch (err) {
@@ -121,25 +121,24 @@ export const RegisterPage = () => {
 
 	return (
 		<div className="flex flex-col gap-6">
-			<div className="animate-element animate-delay-100">
-				<h1 className="text-4xl md:text-5xl font-semibold leading-tight">
+			<div className="animate-delay-100 animate-element">
+				<h1 className="font-semibold text-4xl leading-tight md:text-5xl">
 					<span className="font-light text-foreground tracking-tighter">
 						Join Us
 					</span>
 				</h1>
-				<p className="text-muted-foreground mt-2">
+				<p className="mt-2 text-muted-foreground">
 					Create your account and start your journey with us
 				</p>
 			</div>
 
 			<Form {...form}>
-				<form
-					className="space-y-5"
-					onSubmit={form.handleSubmit(onSubmit)}>
+				<form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
 					{error && (
 						<Alert
 							variant="destructive"
-							className="animate-element animate-delay-300">
+							className="animate-delay-300 animate-element"
+						>
 							<AlertDescription>{error}</AlertDescription>
 						</Alert>
 					)}
@@ -148,8 +147,8 @@ export const RegisterPage = () => {
 						control={form.control}
 						name="name"
 						render={({ field }) => (
-							<FormItem className="animate-element animate-delay-300">
-								<FormLabel className="text-sm font-medium text-muted-foreground">
+							<FormItem className="animate-delay-300 animate-element">
+								<FormLabel className="font-medium text-muted-foreground text-sm">
 									Full Name
 								</FormLabel>
 								<FormControl>
@@ -170,8 +169,8 @@ export const RegisterPage = () => {
 						control={form.control}
 						name="email"
 						render={({ field }) => (
-							<FormItem className="animate-element animate-delay-400">
-								<FormLabel className="text-sm font-medium text-muted-foreground">
+							<FormItem className="animate-delay-400 animate-element">
+								<FormLabel className="font-medium text-muted-foreground text-sm">
 									Email Address
 								</FormLabel>
 								<FormControl>
@@ -192,8 +191,8 @@ export const RegisterPage = () => {
 						control={form.control}
 						name="password"
 						render={({ field }) => (
-							<FormItem className="animate-element animate-delay-500">
-								<FormLabel className="text-sm font-medium text-muted-foreground">
+							<FormItem className="animate-delay-500 animate-element">
+								<FormLabel className="font-medium text-muted-foreground text-sm">
 									Password
 								</FormLabel>
 								<FormControl>
@@ -202,7 +201,7 @@ export const RegisterPage = () => {
 											{...field}
 											type={showPassword ? "text" : "password"}
 											placeholder="Create a secure password"
-											className="rounded-2xl border-border bg-foreground/5 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10 pr-12"
+											className="rounded-2xl border-border bg-foreground/5 pr-12 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10"
 											disabled={isLoading || form.formState.isSubmitting}
 										/>
 										<Button
@@ -211,16 +210,17 @@ export const RegisterPage = () => {
 											size="sm"
 											className="absolute inset-y-0 right-0 px-3 py-0 hover:bg-transparent"
 											onClick={() => setShowPassword(!showPassword)}
-											disabled={isLoading || form.formState.isSubmitting}>
+											disabled={isLoading || form.formState.isSubmitting}
+										>
 											{showPassword ? (
-												<EyeOff className="w-4 h-4 text-muted-foreground" />
+												<EyeOff className="h-4 w-4 text-muted-foreground" />
 											) : (
-												<Eye className="w-4 h-4 text-muted-foreground" />
+												<Eye className="h-4 w-4 text-muted-foreground" />
 											)}
 										</Button>
 									</div>
 								</FormControl>
-								<FormDescription className="text-xs text-muted-foreground">
+								<FormDescription className="text-muted-foreground text-xs">
 									Must contain at least 8 characters, one lowercase letter, one
 									uppercase letter, and one number
 								</FormDescription>
@@ -233,8 +233,8 @@ export const RegisterPage = () => {
 						control={form.control}
 						name="confirmPassword"
 						render={({ field }) => (
-							<FormItem className="animate-element animate-delay-600">
-								<FormLabel className="text-sm font-medium text-muted-foreground">
+							<FormItem className="animate-delay-600 animate-element">
+								<FormLabel className="font-medium text-muted-foreground text-sm">
 									Confirm Password
 								</FormLabel>
 								<FormControl>
@@ -243,7 +243,7 @@ export const RegisterPage = () => {
 											{...field}
 											type={showConfirmPassword ? "text" : "password"}
 											placeholder="Confirm your password"
-											className="rounded-2xl border-border bg-foreground/5 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10 pr-12"
+											className="rounded-2xl border-border bg-foreground/5 pr-12 backdrop-blur-sm focus:border-violet-400/70 focus:bg-violet-500/10"
 											disabled={isLoading || form.formState.isSubmitting}
 										/>
 										<Button
@@ -254,11 +254,12 @@ export const RegisterPage = () => {
 											onClick={() =>
 												setShowConfirmPassword(!showConfirmPassword)
 											}
-											disabled={isLoading || form.formState.isSubmitting}>
+											disabled={isLoading || form.formState.isSubmitting}
+										>
 											{showConfirmPassword ? (
-												<EyeOff className="w-4 h-4 text-muted-foreground" />
+												<EyeOff className="h-4 w-4 text-muted-foreground" />
 											) : (
-												<Eye className="w-4 h-4 text-muted-foreground" />
+												<Eye className="h-4 w-4 text-muted-foreground" />
 											)}
 										</Button>
 									</div>
@@ -272,7 +273,7 @@ export const RegisterPage = () => {
 						control={form.control}
 						name="agreeToTerms"
 						render={({ field }) => (
-							<FormItem className="animate-element animate-delay-700 flex flex-row items-start space-x-3 space-y-0">
+							<FormItem className="flex animate-delay-700 animate-element flex-row items-start space-x-3 space-y-0">
 								<FormControl>
 									<Checkbox
 										checked={field.value}
@@ -281,17 +282,19 @@ export const RegisterPage = () => {
 									/>
 								</FormControl>
 								<div className="space-y-1 leading-none">
-									<FormLabel className="text-sm text-foreground/90 leading-relaxed cursor-pointer font-normal">
+									<FormLabel className="cursor-pointer font-normal text-foreground/90 text-sm leading-relaxed">
 										I accept the{" "}
 										<Link
 											href="#"
-											className="text-violet-400 hover:underline transition-colors">
+											className="text-violet-400 transition-colors hover:underline"
+										>
 											Terms of Service
 										</Link>{" "}
 										and the{" "}
 										<Link
 											href="#"
-											className="text-violet-400 hover:underline transition-colors">
+											className="text-violet-400 transition-colors hover:underline"
+										>
 											Privacy Policy
 										</Link>
 									</FormLabel>
@@ -304,7 +307,8 @@ export const RegisterPage = () => {
 					<Button
 						type="submit"
 						disabled={isLoading || form.formState.isSubmitting}
-						className="animate-element animate-delay-800 w-full rounded-2xl py-6 font-medium">
+						className="w-full animate-delay-800 animate-element rounded-2xl py-6 font-medium"
+					>
 						{isLoading || form.formState.isSubmitting
 							? "Creating account..."
 							: "Create Account"}
@@ -312,9 +316,9 @@ export const RegisterPage = () => {
 				</form>
 			</Form>
 
-			<div className="animate-element animate-delay-700 relative flex items-center justify-center">
-				<span className="w-full border-t border-border"></span>
-				<span className="px-4 text-sm text-muted-foreground bg-background absolute">
+			<div className="relative flex animate-delay-700 animate-element items-center justify-center">
+				<span className="w-full border-border border-t" />
+				<span className="absolute bg-background px-4 text-muted-foreground text-sm">
 					Or continue with
 				</span>
 			</div>
@@ -323,16 +327,18 @@ export const RegisterPage = () => {
 				variant="outline"
 				onClick={handleGoogleSignIn}
 				disabled={isLoading || form.formState.isSubmitting}
-				className="animate-element animate-delay-800 w-full rounded-2xl py-6 border-border hover:bg-secondary">
+				className="w-full animate-delay-800 animate-element rounded-2xl border-border py-6 hover:bg-secondary"
+			>
 				<GoogleIcon />
 				Continue with Google
 			</Button>
 
-			<p className="animate-element animate-delay-900 text-center text-sm text-muted-foreground">
+			<p className="animate-delay-900 animate-element text-center text-muted-foreground text-sm">
 				Already have an account?{" "}
 				<Link
 					href="/login"
-					className="text-violet-400 hover:underline transition-colors">
+					className="text-violet-400 transition-colors hover:underline"
+				>
 					Log in
 				</Link>
 			</p>

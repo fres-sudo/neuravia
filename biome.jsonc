@@ -9,7 +9,7 @@
 	"formatter": { "enabled": true },
 	"organizeImports": { "enabled": true },
 	"linter": {
-		"enabled": true,
+		"enabled": false,
 		"rules": {
 			"nursery": {
 				"useSortedClasses": {

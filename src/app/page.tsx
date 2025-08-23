@@ -14,7 +14,8 @@ export default async function Home() {
 						<Link
 							className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
 							href="https://create.t3.gg/en/usage/first-steps"
-							target="_blank">
+							target="_blank"
+						>
 							<h3 className="font-bold text-2xl">First Steps →</h3>
 							<div className="text-lg">
 								Just the basics - Everything you need to know to set up your
@@ -24,7 +25,8 @@ export default async function Home() {
 						<Link
 							className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
 							href="https://create.t3.gg/en/introduction"
-							target="_blank">
+							target="_blank"
+						>
 							<h3 className="font-bold text-2xl">Documentation →</h3>
 							<div className="text-lg">
 								Learn more about Create T3 App, the libraries it uses, and how
@@ -32,7 +34,7 @@ export default async function Home() {
 							</div>
 						</Link>
 					</div>
-					<div className="flex flex-col items-center gap-2"></div>
+					<div className="flex flex-col items-center gap-2" />
 				</div>
 			</main>
 		</HydrateClient>
