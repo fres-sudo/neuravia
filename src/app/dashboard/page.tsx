@@ -11,8 +11,17 @@ import { hasCurrentWeekDiary } from "@/lib/utils";
 import { signOut, useSession } from "@/server/auth/auth-client";
 import { api } from "@/trpc/react";
 import { formatDate } from "date-fns";
-import {Plus, User, Settings, Notebook, BarChart3, Images} from "lucide-react";
+import {
+	Plus,
+	User,
+	Settings,
+	Notebook,
+	BarChart3,
+	Images,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import AddPatientDialog from "../../components/add-patient-dialog";
+import { ModeToggle } from "@/components/mode-toggle";
 export default function Page() {
 	const query = api.patitents.fetch.useQuery();
 
@@ -38,6 +47,7 @@ export default function Page() {
 							variant="outline">
 							Logout
 						</Button>
+						<ModeToggle />
 					</div>
 				</div>
 			</header>
@@ -54,6 +64,7 @@ export default function Page() {
 								Manage your family profiles and track your assistance journey
 							</CardDescription>
 						</CardHeader>
+
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div>
@@ -78,20 +89,16 @@ export default function Page() {
 
 					{/* Patients Section */}
 					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-							<div>
+						<div className="flex items-center justify-between">
+							<CardHeader className="flex flex-col pb-6">
 								<CardTitle>Your Patients</CardTitle>
 								<CardDescription>
 									Manage profiles and track development for each patient
 								</CardDescription>
-							</div>
-							<Button
-								onClick={() => router.push("/dashbaord/add-patient")}
-								className="flex items-center gap-2">
-								<Plus className="h-4 w-4" />
-								Add Patient
-							</Button>
-						</CardHeader>
+							</CardHeader>
+							<AddPatientDialog />
+						</div>
+
 						<CardContent>
 							{query.isLoading ? (
 								<div className="flex items-center justify-center py-8">
@@ -125,10 +132,11 @@ export default function Page() {
 													size="icon"
 													variant="outline"
 													className="absolute top-4 right-4"
-													onClick={() => router.push(`/patient/${patient.id}/upload`)}
-												  >
+													onClick={() =>
+														router.push(`/patient/${patient.id}/upload`)
+													}>
 													<Images className="h-4 w-4" />
-												  </Button>
+												</Button>
 												<div className="flex items-center space-x-4 mb-4">
 													<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
 														<User className="h-6 w-6 text-primary" />

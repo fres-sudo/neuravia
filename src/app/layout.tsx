@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
 	title: "Neuravia",
@@ -25,8 +26,15 @@ export default function RootLayout({
 			lang="en"
 			className={`${geist.variable}`}>
 			<body>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange>
+					<TRPCReactProvider>{children}</TRPCReactProvider>
+				</ThemeProvider>
+
 				<Toaster />
-				<TRPCReactProvider>{children}</TRPCReactProvider>
 			</body>
 		</html>
 	);
