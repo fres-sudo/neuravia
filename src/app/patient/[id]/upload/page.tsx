@@ -14,8 +14,6 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
-
 type InferenceResult = {
   predicted_label: string;
   predicted_class_idx: number;
@@ -52,44 +50,49 @@ export default function Page() {
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const disabled = useMemo(() => files.length === 0 || isUploading || isProcessing, [files, isUploading, isProcessing]);
+
+  const disabled = useMemo(
+    () => files.length === 0 || isUploading || isProcessing,
+    [files, isUploading, isProcessing]
+  );
 
   const handleFilesChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const list = e.target.files ? Array.from(e.target.files) : [];
-      setFiles(list);
+      setFiles(e.target.files ? Array.from(e.target.files) : []);
     },
     []
   );
 
-  const handleUploadAndProcess = useCallback(async () => {
+  const uploadMutation = api.images.uploadAndProcess.useMutation();
+
+  const handleUploadAndProcess = async () => {
     if (!patientId || files.length === 0) return;
+
+    setIsUploading(true);
+    setIsProcessing(true);
+
     try {
-      setIsUploading(true);
-      setIsProcessing(true);
+      const base64Files = await Promise.all(
+        files.map(async (file) => {
+          const arrayBuffer = await file.arrayBuffer();
+          return {
+            name: file.name,
+            contentBase64: Buffer.from(arrayBuffer).toString("base64"),
+          };
+        })
+      );
 
-      const form = new FormData();
-      files.forEach((f) => form.append("files", f, f.name));
-
-      const res = await fetch(`${API_BASE_URL}/api/images/${patientId}/upload`, {
-        method: "POST",
-        body: form,
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `Upload failed with status ${res.status}`);
-      }
+      await uploadMutation.mutateAsync({ patientId, files: base64Files });
 
       setFiles([]);
       await imagesQuery.refetch();
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error(err);
     } finally {
       setIsUploading(false);
       setIsProcessing(false);
     }
-  }, [patientId, files, imagesQuery]);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,28 +153,24 @@ export default function Page() {
                 ) : (
                   <div className="space-y-6">
                     {imagesQuery.data.map((img) => {
-                      const results = img.results as unknown as InferenceResult | undefined;
+                      const results = img.results as InferenceResult | undefined;
                       return (
                         <Card key={img.id} className="p-6 border">
                           <div className="flex gap-6">
                             {/* Image */}
                             <div className="flex-shrink-0">
                               <img
-                                src={`${API_BASE_URL}/uploads/${img.filename}`}
+                                src={`/uploads/${img.filename}`}
                                 alt="MRI Scan"
                                 className="w-32 h-32 object-cover rounded-lg border"
-                                onError={(e) => {
-                                  (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
-                                }}
+                                onError={(e) => ((e.currentTarget as HTMLImageElement).src = "/placeholder.svg")}
                               />
                             </div>
 
                             {/* Meta + Results */}
                             <div className="flex-1 space-y-4">
                               <div className="flex items-center justify-between">
-                                <p className="text-sm text-muted-foreground">
-                                  {formatDate(img.uploadedAt as unknown as string)}
-                                </p>
+                                <p className="text-sm text-muted-foreground">{formatDate(img.uploadedAt)}</p>
                                 {results?.predicted_label && (
                                   <Badge className={labelClass(results.predicted_label)}>
                                     {results.predicted_label.replaceAll("_", " ")}
@@ -193,16 +192,9 @@ export default function Page() {
                                     <div className="space-y-2">
                                       {results.all_labels.map((label, i) => (
                                         <div key={label} className="flex items-center gap-2">
-                                          <span className="text-xs w-28 text-muted-foreground">
-                                            {label.replaceAll("_", " ")}
-                                          </span>
-                                          <Progress
-                                            value={(results.probabilities[i] ?? 0) * 100}
-                                            className="h-1.5 flex-1"
-                                          />
-                                          <span className="text-xs w-12 text-right">
-                                            {Math.round((results.probabilities[i] ?? 0) * 100)}%
-                                          </span>
+                                          <span className="text-xs w-28 text-muted-foreground">{label.replaceAll("_", " ")}</span>
+                                          <Progress value={(results.probabilities[i] ?? 0) * 100} className="h-1.5 flex-1" />
+                                          <span className="text-xs w-12 text-right">{Math.round((results.probabilities[i] ?? 0) * 100)}%</span>
                                         </div>
                                       ))}
                                     </div>
