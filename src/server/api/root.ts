@@ -4,6 +4,7 @@ import { imagesRouter } from "./routers/images.router";
 import { patientsRouter } from "./routers/patients.router";
 import { diaryRouter } from "./routers/diary.router";
 import { patientSettingsRouter } from "./routers/patient-settings.router";
+import { scoringRouter } from "./routers/scoring.router";
 
 /**
  * This is the primary router for your server.
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
 	images: imagesRouter,
 	diary: diaryRouter,
 	patientSettings: patientSettingsRouter,
+	scoring: scoringRouter,
 });
 
 // export type definition of API

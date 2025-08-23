@@ -221,6 +221,28 @@ export const images = sqliteTable(
 	]
 )
 
+export const boostScores = sqliteTable(
+    "boost_scores",
+    {
+        id: text("id").primaryKey(), // UUID as text
+        patientId: text("patient_id").notNull(),
+        timestamp: text("timestamp").default(sql`(datetime('now'))`),
+        activityType: text("activity_type").notNull(), // 'initial_assessment', 'mri_upload', 'weekly_form', 'game_played'
+        previousScore: integer("previous_score"),
+        newScore: integer("new_score").notNull(),
+        activityValue: integer("activity_value").notNull(), // Raw score from the activity
+        weight: integer("weight").notNull(), // Weight applied (0.1 to 1.0)
+        metadata: text("metadata", { mode: "json" }), // Additional info as JSON
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.patientId],
+            foreignColumns: [patients.id],
+            name: "boost_scores_patient_id_fk",
+        }).onDelete("cascade"),
+    ]
+)
+
 // Relations
 export const caregiversRelations = relations(user, ({ one, many }) => ({
 	settings: one(caregiverSettings, {
