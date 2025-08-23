@@ -4,7 +4,11 @@ import { useGameStore } from "@/stores/game-store";
 import { useState } from "react";
 import { ProfileSetupModal } from "../modals/profile-setup-modal";
 
-export const WelcomeScreen = () => {
+interface WelcomeScreenProps {
+	patientId?: string;
+}
+
+export const WelcomeScreen = ({ patientId }: WelcomeScreenProps) => {
 	const showWelcome = useGameStore((state) => state.showWelcome);
 	const [showProfile, setShowProfile] = useState(false);
 
@@ -33,7 +37,10 @@ export const WelcomeScreen = () => {
 			</div>
 
 			{showProfile && (
-				<ProfileSetupModal onClose={() => setShowProfile(false)} />
+				<ProfileSetupModal 
+					onClose={() => setShowProfile(false)} 
+					patientId={patientId}
+				/>
 			)}
 		</>
 	);

@@ -122,7 +122,7 @@ export default function Page() {
 									<AlertTriangle className="w-5 h-5" />
 									<span className="text-sm font-medium">
 										Be careful: once submitted and processed, you won’t be able
-										to update this diary.
+										to update this diary for a while.
 									</span>
 								</div>
 								<div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">

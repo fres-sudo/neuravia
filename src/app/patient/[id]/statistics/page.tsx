@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Brain, 
@@ -12,7 +13,8 @@ import {
   Upload, 
   TrendingUp, 
   Calendar,
-  Activity
+  Activity,
+  ArrowLeft
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -106,13 +108,24 @@ export default function StatisticsPage() {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Statistics for {currentPatient.name}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Track progress and activity history
-          </p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Statistics for {currentPatient.name}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Track progress and activity history
+            </p>
+          </div>
         </div>
         <Badge variant="outline" className="text-sm">
           Patient ID: {patientId}
