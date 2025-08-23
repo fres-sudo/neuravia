@@ -1,6 +1,6 @@
 "use server";
 
-import { openai } from "@/lib/openai";
+import { openai } from "@/app/api/openai/openai";
 
 export async function generateAIResponse(prompt: string) {
   try {
