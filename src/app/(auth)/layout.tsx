@@ -6,8 +6,7 @@ const GoogleIcon = () => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		className="h-5 w-5"
-		viewBox="0 0 48 48"
-	>
+		viewBox="0 0 48 48">
 		<path
 			fill="#FFC107"
 			d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s12-5.373 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-2.641-.21-5.236-.611-7.743z"
@@ -50,8 +49,7 @@ const TestimonialCard = ({
 	delay: string;
 }) => (
 	<div
-		className={`animate-testimonial ${delay} flex w-64 items-start gap-3 rounded-3xl border border-white/10 bg-card/40 p-5 backdrop-blur-xl dark:bg-zinc-800/40`}
-	>
+		className={`animate-testimonial ${delay} flex w-64 items-start gap-3 rounded-3xl border border-white/10 bg-card/40 p-5 backdrop-blur-xl dark:bg-zinc-800/40`}>
 		<img
 			src={testimonial.avatarSrc}
 			className="h-10 w-10 rounded-2xl object-cover"
@@ -86,8 +84,6 @@ const sampleTestimonials: Testimonial[] = [
 	},
 ];
 
-// --- MAIN LAYOUT COMPONENT ---
-
 export default function AuthLayout({ children }: AuthLayoutProps) {
 	return (
 		<div className="flex h-[100dvh] w-[100dvw] flex-col bg-background font-geist text-foreground md:flex-row">
@@ -98,8 +94,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 						<svg
 							className="h-8 w-8 text-primary"
 							viewBox="0 0 24 24"
-							fill="currentColor"
-						>
+							fill="currentColor">
 							<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
 						</svg>
 						<span className="ml-2 font-bold text-xl">Vitalis</span>

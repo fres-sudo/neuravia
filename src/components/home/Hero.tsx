@@ -56,12 +56,11 @@ const Hero = () => {
 					<div className="relative">
 						<div className="relative rounded-2xl overflow-hidden shadow-large">
 							<Image
-								src={"/alzheimer-score.png"}
+								src="/alzheimer-score.png"
 								width={500}
 								height={500}
 								alt="Elderly person using cognitive training app with caregiver support"
 								className="w-full h-auto object-cover"
-								loading="eager"
 							/>
 							<div className="absolute inset-0 bg-gradient-hero opacity-10"></div>
 						</div>
