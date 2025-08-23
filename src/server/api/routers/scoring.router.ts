@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { boostScores, patients } from "@/server/db/schema";
 import { takeFirstOrThrow } from "@/lib/utils";
 import { z } from "zod";
+import { BoostScoreService } from "@/scoring/service";
 
 // Schema for inserting a boost score
 const insertBoostScoreSchema = z.object({
@@ -141,5 +142,58 @@ export const scoringRouter = createTRPCRouter({
         .from(boostScores)
         .where(whereConditions)
         .orderBy(desc(boostScores.timestamp));
+    }),
+
+  // Insert score with automatic previous score calculation
+  insertWithPreviousScore: protectedProcedure
+    .input(z.object({
+      patientId: z.string(),
+      activityType: z.enum(['initial_assessment', 'mri_upload', 'weekly_form', 'game_played']),
+      activityValue: z.number(),
+      weight: z.number().min(0.1).max(1.0).optional(),
+      metadata: z.any().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify that the patient belongs to the caregiver
+      const patient = await ctx.db
+        .query.patients.findFirst({
+          where: eq(patients.id, input.patientId),
+        });
+
+      if (!patient) {
+        throw new Error("Patient not found");
+      }
+
+      if (patient.caregiverId !== ctx.session.user.id) {
+        throw new Error("Unauthorized");
+      }
+
+      // Get the latest score
+      const latestScore = await ctx.db
+        .select()
+        .from(boostScores)
+        .where(eq(boostScores.patientId, input.patientId))
+        .orderBy(desc(boostScores.timestamp))
+        .limit(1)
+        .then((results) => results[0]?.newScore ?? 0);
+
+      const boostService = new BoostScoreService();
+      const weight = input.weight ?? boostService.getDefaultWeight(input.activityType);
+      const newScore = boostService.calculateNewScore(latestScore, input.activityValue, weight);
+
+      return await ctx.db
+        .insert(boostScores)
+        .values({
+          id: crypto.randomUUID(),
+          patientId: input.patientId,
+          activityType: input.activityType,
+          previousScore: latestScore,
+          newScore: newScore,
+          activityValue: input.activityValue,
+          weight: weight,
+          metadata: input.metadata,
+        })
+        .returning()
+        .then(takeFirstOrThrow);
     }),
 });
