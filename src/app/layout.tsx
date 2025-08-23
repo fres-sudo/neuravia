@@ -24,12 +24,14 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={`${geist.variable} light`}>
-			<body>
+			className={`${geist.variable}`}
+			suppressHydrationWarning>
+			<body suppressHydrationWarning>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="light"
 					enableSystem={false}
+					forcedTheme="light"
 					disableTransitionOnChange>
 					<TRPCReactProvider>{children}</TRPCReactProvider>
 				</ThemeProvider>
