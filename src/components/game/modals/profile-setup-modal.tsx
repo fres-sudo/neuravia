@@ -14,7 +14,7 @@ interface ProfileSetupModalProps {
 
 export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps) => {
 	const { startSession } = useGameSession();
-	const [step, setStep] = useState(0);
+	const [step, setStep] = useState(1); // Start directly at difficulty selection
 	const [profession, setProfession] = useState("");
 	const [difficulty, setDifficulty] = useState<DifficultyLevel>("mild");
 	const [gameMode, setGameMode] = useState<GameMode>("short");
@@ -23,7 +23,7 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 	const { data: patients, isLoading } = api.patients.fetch.useQuery();
 	const currentPatient = patients?.find(p => p.id === patientId);
 
-	// Skip profession step if we have patient data
+	// Get profession from patient data
 	useEffect(() => {
 		if (currentPatient && currentPatient.job) {
 			let patientProfession = "";
@@ -33,24 +33,8 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 				patientProfession = currentPatient.job.type;
 			}
 			setProfession(patientProfession);
-			setStep(1); // Skip to difficulty selection
-		} else if (!isLoading && patientId && !currentPatient) {
-			// Patient ID provided but not found, start from step 0
-			setStep(0);
-		} else if (!isLoading && !patientId) {
-			// No patient ID, start from step 0
-			setStep(0);
 		}
-	}, [currentPatient, isLoading, patientId]);
-
-	const professions = [
-		{ value: "teacher", label: "Teacher", icon: "👩‍🏫" },
-		{ value: "doctor", label: "Doctor", icon: "👨‍⚕️" },
-		{ value: "engineer", label: "Engineer", icon: "👷‍♀️" },
-		{ value: "chef", label: "Chef", icon: "👨‍🍳" },
-		{ value: "artist", label: "Artist", icon: "🎨" },
-		{ value: "other", label: "Other", icon: "👤" },
-	];
+	}, [currentPatient]);
 
 	const difficulties = [
 		{
@@ -107,47 +91,9 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 		onClose();
 	};
 
-	// Show loading if still fetching patient data
-	if (isLoading && patientId) {
-		return (
-			<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-				<div className="bg-white rounded-3xl p-8 max-w-2xl mx-4 shadow-2xl">
-					<div className="text-center">
-						<h3 className="text-3xl font-bold text-gray-700 mb-6">
-							Loading...
-						</h3>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
 	return (
 		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 			<div className="bg-white rounded-3xl p-8 max-w-2xl mx-4 shadow-2xl">
-				{/* Show profession step if we're on step 0 */}
-				{step === 0 && (
-					<div className="text-center">
-						<h3 className="text-3xl font-bold text-gray-700 mb-6">
-							What's your profession?
-						</h3>
-						<div className="grid grid-cols-2 gap-4">
-							{professions.map((prof) => (
-								<button
-									key={prof.value}
-									onClick={() => {
-										setProfession(prof.value);
-										setStep(1);
-									}}
-									className="flex flex-col items-center p-6 bg-gray-100 hover:bg-blue-100 rounded-2xl transition-colors">
-									<div className="text-4xl mb-2">{prof.icon}</div>
-									<span className="font-bold text-lg">{prof.label}</span>
-								</button>
-							))}
-						</div>
-					</div>
-				)}
-
 				{/* Show difficulty step */}
 				{step === 1 && (
 					<div className="text-center">
@@ -168,14 +114,6 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 								</button>
 							))}
 						</div>
-						{/* Only show back button if we didn't skip profession step */}
-						{!(currentPatient && currentPatient.job) && (
-							<button
-								onClick={() => setStep(0)}
-								className="mt-6 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-6 rounded-xl">
-								← Back
-							</button>
-						)}
 					</div>
 				)}
 
