@@ -152,9 +152,9 @@ export default function Page() {
 					</div>
 
 					{/* Patients Section */}
-					<Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
-						<CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 border-b border-blue-100/50 rounded-t-lg">
-							<div className="flex justify-between items-center">
+					<Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm overflow-hidden">
+						<CardHeader className="bg-gradient-to-r from-blue-50 via-blue-50/80 to-green-50 border-b border-blue-100/50">
+							<div className="flex justify-between items-center w-full">
 								<div>
 									<CardTitle className="text-2xl text-slate-800 flex items-center gap-3">
 										<div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
