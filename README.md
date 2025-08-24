@@ -55,6 +55,7 @@ DATABASE_AUTH_TOKEN=...
 BETTER_AUTH_SECRET=...
 BETTER_AUTH_URL=http://localhost:3000
 OPENAI_API_KEY=your_openai_api_key_here
+USE_MOCK_DATA=true
 ```
 
 Run the development server:
@@ -83,4 +84,4 @@ Launch the FastAPI server:
 uvicorn main:app --host 0.0.0.0 --port 5000
 ```
 
-Ensure that the `USE_MOCK_DATA` variable in the `src/app/patient/[id]/upload/page.tsx` file is set to `false` to enable real MRI classification.
+Ensure that the `USE_MOCK_DATA` variable in the `.env` file is set to `false` to enable real MRI classification.
