@@ -27,21 +27,69 @@ export const TodoListGame = () => {
 	const [gameResult, setGameResult] = useState<'correct' | 'incorrect' | null>(null); // Track game result
 	const [gameCompleted, setGameCompleted] = useState(false); // Track if game is completed
 
+	// Comprehensive task pools for variety
+	const taskPools = useMemo(() => ({
+		teacher: [
+			"📚 Prepare lessons", "✏️ Grade papers", "🍎 Eat lunch", "📐 Setup classroom",
+			"👥 Staff meeting", "📊 Update gradebook", "📞 Call parents", "🖨️ Make copies",
+			"📝 Write lesson plans", "🎨 Prepare materials", "💻 Check emails", "📋 Take attendance",
+			"🧪 Setup lab experiment", "📖 Read student essays", "🎭 Rehearse play", "🏃 Playground duty",
+			"📚 Order supplies", "🎯 Plan activities", "📱 Update website", "🗂️ File paperwork"
+		],
+		office: [
+			"☕ Morning coffee", "📧 Check emails", "📝 Write report", "📞 Team meeting",
+			"💼 Client presentation", "📊 Review budget", "🖥️ Update database", "📋 Schedule appointments",
+			"💻 Code review", "📈 Analyze data", "🍕 Lunch break", "📱 Return calls",
+			"📂 Organize files", "✅ Project checklist", "🎯 Set priorities", "💡 Brainstorm ideas",
+			"📊 Create charts", "🔍 Research competitors", "📝 Draft proposal", "🤝 Network event"
+		],
+		home: [
+			"🛏️ Make bed", "🧽 Wash dishes", "🛒 Grocery shopping", "🧺 Do laundry",
+			"🍳 Cook dinner", "🧹 Vacuum floors", "🚿 Take shower", "📺 Watch TV",
+			"🌱 Water plants", "🚗 Car maintenance", "📞 Call family", "🎮 Play games",
+			"📚 Read book", "🧘 Exercise", "🛁 Clean bathroom", "🗑️ Take out trash",
+			"🐕 Walk dog", "💊 Take vitamins", "📱 Pay bills", "🎵 Listen music"
+		],
+		health: [
+			"💊 Take medication", "🏃 Morning jog", "🥗 Healthy breakfast", "💧 Drink water",
+			"🧘 Meditation", "🏋️ Gym workout", "😴 Get sleep", "🥬 Eat vegetables",
+			"🚶 Take walk", "📱 Track calories", "🧴 Take vitamins", "🦷 Brush teeth",
+			"🍎 Eat fruit", "🧘‍♀️ Yoga session", "📊 Check weight", "🚭 Avoid smoking",
+			"☀️ Get sunlight", "🤝 Social time", "📖 Read wellness", "🛀 Relaxing bath"
+		]
+	}), []);
+
+	// Generate tasks with variety based on profession and round
 	const tasks = useMemo(() => {
-		  return profile?.profession === "teacher"
-			? [
-				"📚 Prepare lessons",
-				"✏️ Grade papers",
-				"🍎 Eat lunch",
-				"📐 Setup classroom",
-			  ].slice(0, gameSettings.itemCount)
-			: [
-				"☕ Morning coffee",
-				"📧 Check emails",
-				"📝 Write report",
-				"📞 Team meeting",
-			  ].slice(0, gameSettings.itemCount);
-	}, [profile?.profession, gameSettings.itemCount]);
+		const currentRound = session?.currentRound || 1;
+
+		// Determine which pool to use based on profession, with some variety
+		let selectedPool: string[];
+		if (profile?.profession === "teacher") {
+			// Mix teacher tasks with occasional home/health tasks for variety
+			if (currentRound % 4 === 0) selectedPool = taskPools.home;
+			else if (currentRound % 5 === 0) selectedPool = taskPools.health;
+			else selectedPool = taskPools.teacher;
+		} else {
+			// Mix office tasks with occasional home/health tasks for variety
+			if (currentRound % 4 === 0) selectedPool = taskPools.home;
+			else if (currentRound % 5 === 0) selectedPool = taskPools.health;
+			else selectedPool = taskPools.office;
+		}
+
+		// Create a seed based on current round for consistent randomization within the same round
+		const seed = currentRound * 1337; // Simple seed generation
+		const seededRandom = (index: number) => {
+			const x = Math.sin(seed + index) * 10000;
+			return x - Math.floor(x);
+		};
+
+		// Shuffle the pool using seeded random to ensure consistency within the same round
+		const shuffledPool = [...selectedPool].sort((a, b) => seededRandom(selectedPool.indexOf(a)) - seededRandom(selectedPool.indexOf(b)));
+
+		// Take the required number of items
+		return shuffledPool.slice(0, gameSettings.itemCount);
+	}, [profile?.profession, gameSettings.itemCount, session?.currentRound, taskPools]);
 
 	// Reset game state when a new round starts
 	useEffect(() => {
@@ -78,7 +126,7 @@ export const TodoListGame = () => {
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout | null = null;
-		
+
 		if (timerActive && timeRemaining > 0) {
 			interval = setInterval(() => {
 				tick();
@@ -120,11 +168,11 @@ export const TodoListGame = () => {
 				// Check if the selected task has the expected order number
 				return selectedTask.order === expectedOrder;
 			});
-			
+
 			console.log("User selection order:", newOrder.map(t => ({ text: t.text, order: t.order })));
 			console.log("Expected order:", originalTasks.map(t => ({ text: t.text, order: t.order })));
 			console.log("Is correct:", isCorrect);
-			
+
 			const rawData = {
 				gameType: "todo-list",
 				roundNumber: gameSettings.itemCount,
@@ -134,7 +182,7 @@ export const TodoListGame = () => {
 				totalTasks: originalTasks.length,
 				timeSpent: gameSettings.timerDuration - timeRemaining,
 			};
-			
+
 			completeGame(isCorrect ? 15 : 8, rawData);
 			setGameResult(isCorrect ? 'correct' : 'incorrect');
 			setGameCompleted(true);
@@ -176,7 +224,7 @@ export const TodoListGame = () => {
 						{shuffledTasks.map((task) => {
 							const isSelected = userOrder.find((t) => t.id === task.id);
 							const orderIndex = userOrder.findIndex((t) => t.id === task.id);
-							
+
 							// Check if this selection is correct - the selected task should have the right order number
 							// for the position it was selected in
 							const isSelectionCorrect = isSelected ? (task.order === orderIndex + 1) : false;
@@ -207,8 +255,8 @@ export const TodoListGame = () => {
 			)}
 
 			{phase === "complete" && (
-				<GameComplete 
-					message={gameResult === 'correct' ? "Perfect! Right order! 🎯" : "Good try! Wrong order 📝"} 
+				<GameComplete
+					message={gameResult === 'correct' ? "Perfect! Right order! 🎯" : "Good try! Wrong order 📝"}
 					isCorrect={gameResult === 'correct'}
 				/>
 			)}
