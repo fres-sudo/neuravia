@@ -23,19 +23,6 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 	const { data: patients, isLoading } = api.patients.fetch.useQuery();
 	const currentPatient = patients?.find(p => p.id === patientId);
 
-	// Get profession from patient data
-	useEffect(() => {
-		if (currentPatient && currentPatient.job) {
-			let patientProfession = "";
-			if (currentPatient.job.type === "other") {
-				patientProfession = currentPatient.job.customLabel?.toLowerCase() || "other";
-			} else {
-				patientProfession = currentPatient.job.type;
-			}
-			setProfession(patientProfession);
-		}
-	}, [currentPatient]);
-
 	const difficulties = [
 		{
 			value: "mild",
@@ -58,7 +45,6 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 	];
 
 	const handleStart = () => {
-		// Crea assets personalizzati basati sulla professione
 		const customAssets = {
 			"scene-crasher": {
 				background: profession === "teacher" ? "blackboard" : "office",
