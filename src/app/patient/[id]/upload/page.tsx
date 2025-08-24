@@ -144,7 +144,7 @@ export default function Page() {
                   <div>
                     <p className="text-sm font-medium text-orange-800">Demo Mode Active</p>
                     <p className="text-xs text-orange-700 mt-1">
-                      This is a demonstration using simulated AI analysis results. This should connect to the real server that actually works for MRI analysis, but we were unable to deploy it here due to free account limitations
+                      This is a demonstration using simulated AI analysis results. This should connect to the real server that actually works for MRI analysis, but we were unable to deploy it here due to free account limitations. You can find the AI model in the repository we submitted.
                     </p>
                   </div>
                 </div>
