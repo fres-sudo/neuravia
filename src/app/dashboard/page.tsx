@@ -39,7 +39,7 @@ export default function Page() {
 		const url = `http${
 			process.env.NODE_ENV === "development"
 				? "://localhost:3000"
-				: `s://${process.env.VERCEL_URL}`
+				: `s://neuravia-gamma.vercel.app`
 		}/room/${session?.user.id}/${patientId}`;
 
 		try {
