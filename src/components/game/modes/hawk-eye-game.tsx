@@ -12,6 +12,7 @@ export const HawkEyeGame = () => {
 	const completeGame = useGameStore((state) => state.completeGame);
 	const nextGame = useGameStore((state) => state.nextGame);
 	const session = useGameStore((state) => state.session); // Add session to track rounds
+	const [memorizeArmed, setMemorizeArmed] = useState(false);
 
 	const [phase, setPhase] = useState("memorize");
 	const [targetIndex, setTargetIndex] = useState(0);
@@ -39,21 +40,29 @@ export const HawkEyeGame = () => {
 		setTargetIndex(0);
 		setBirds([]);
 		setSelectedBird(null);
+		setMemorizeArmed(false);
 		stopTimer();
 	}, [session?.currentRound, stopTimer]);
 
 	useEffect(() => {
+	  if (phase === "memorize" && timeRemaining > 0 && !memorizeArmed) {
+		setMemorizeArmed(true);
+	  }
+	}, [phase, timeRemaining, memorizeArmed]);
+
+	useEffect(() => {
 		// Reset game state when component mounts or phase changes to memorize
 		if (phase === "memorize") {
+			const randomIndex = Math.floor(Math.random() * birdEmojis.length);
 			const initialBirds = birdEmojis.map((emoji, index) => ({
 				id: index,
 				emoji,
 				x: 20 + (index % 2) * 50,
 				y: 25 + Math.floor(index / 2) * 50,
-				isTarget: index === 0,
+				isTarget: index === randomIndex,
 			}));
 			setBirds(initialBirds);
-			setTargetIndex(0);
+			setTargetIndex(randomIndex);
 			setSelectedBird(null);
 
 			// Start timer with a small delay to ensure proper initialization
@@ -73,7 +82,7 @@ export const HawkEyeGame = () => {
 		}
 
 		// Handle phase transitions
-		if (timeRemaining === 0 && phase === "memorize") {
+		if (phase === "memorize" && memorizeArmed && timeRemaining === 0) {
 			setPhase("moving");
 			stopTimer();
 			startMoving();
@@ -84,7 +93,7 @@ export const HawkEyeGame = () => {
 				clearInterval(interval);
 			}
 		};
-	}, [timerActive, timeRemaining, phase, tick, stopTimer]);
+	}, [timerActive, timeRemaining, phase, memorizeArmed, tick, stopTimer]);
 
 	const startMoving = () => {
 		let moveCount = 0;
@@ -172,8 +181,9 @@ export const HawkEyeGame = () => {
 
 			{phase === "complete" && (
 				<GameComplete
+					isCorrect={ selectedBird === targetIndex }
 					message={
-						selectedBird === targetIndex ? "Perfect! 🎯" : "Good try! 👍"
+						selectedBird === targetIndex ? "Perfect! 🎯" : "Good try👍 But it was not that one."
 					}
 				/>
 			)}
