@@ -126,20 +126,24 @@ export default function StatisticsPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Current Score</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{latestScore.toFixed(1)}</div>
-              <p className={`text-xs ${scoreChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {scoreChange >= 0 ? '+' : ''}{scoreChange.toFixed(1)} from last activity
-              </p>
-            </CardContent>
-          </Card>
+        {/* Summary Cards */}
+        <Card className="col-span-full bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 shadow-lg">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-lg font-semibold text-blue-900">Current BOOST Score</CardTitle>
+            <div className="p-2 bg-blue-500 rounded-full">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-5xl font-bold text-blue-900 mb-2">{latestScore.toFixed(1)}</div>
+            <p className={`text-base font-medium ${scoreChange >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+              {scoreChange >= 0 ? '↗️ +' : '↘️ '}{scoreChange.toFixed(1)} from last activity
+            </p>
+          </CardContent>
+        </Card>
 
+        {/* Secondary Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Activities</CardTitle>
