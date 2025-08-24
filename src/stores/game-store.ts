@@ -91,12 +91,12 @@ const useGameStore = create<GameStore>()(
 				showInstructions: true,
 			},
 			startSession: (mode, profile, patientId) => {
-				const totalRounds = mode === "short" ? 4 : 16;
+				const totalRounds = mode === "short" ? 12 : 40; // 4 games × 3 or 10 rounds
 				set({
 					session: {
 						mode,
-						currentGameIndex: 0,
-						currentRound: 1,
+						currentGameIndex: 0, // Start with first game (scene-crasher)
+						currentRound: 1, // Start with round 1
 						totalRounds,
 						score: 0,
 						startTime: new Date(),
@@ -108,7 +108,7 @@ const useGameStore = create<GameStore>()(
 					showWelcome: false,
 					isPlaying: true,
 				});
-				// Avvia automaticamente il primo gioco
+				// Start the first game
 				const gameOrder: GameType[] = [
 					"scene-crasher",
 					"hawk-eye",
@@ -173,28 +173,41 @@ const useGameStore = create<GameStore>()(
 			nextGame: () => {
 				const { session } = get();
 				if (!session) return;
+				
 				const gameOrder: GameType[] = [
 					"scene-crasher",
-					"hawk-eye",
+					"hawk-eye", 
 					"todo-list",
 					"flashing-memory",
 				];
-				const nextIndex = (session.currentGameIndex + 1) % gameOrder.length;
-				const nextRound =
-					nextIndex === 0 ? session.currentRound + 1 : session.currentRound;
+				
+				// Calculate rounds per game based on session type
+				const roundsPerGame = session.mode === "short" ? 3 : 10;
+				const totalGames = 4;
+				
+				// Calculate which game we should be on and which round within that game
+				const currentGameType = Math.floor((session.currentRound - 1) / roundsPerGame);
+				const nextRound = session.currentRound + 1;
+				const nextGameType = Math.floor((nextRound - 1) / roundsPerGame);
+				
+				// Check if session is complete
 				if (nextRound > session.totalRounds) {
-					// Session is complete, end it
 					get().endSession();
 					return;
 				}
+				
+				// Update session state
 				set((state) => ({
 					session: {
 						...session,
-						currentGameIndex: nextIndex,
+						currentGameIndex: Math.min(nextGameType, totalGames - 1),
 						currentRound: nextRound,
 					},
 				}));
-				get().startGame(gameOrder[nextIndex]!);
+				
+				// Start the appropriate game
+				const gameToStart = gameOrder[Math.min(nextGameType, totalGames - 1)]!;
+				get().startGame(gameToStart);
 			},
 			startTimer: (duration) => {
 				set({

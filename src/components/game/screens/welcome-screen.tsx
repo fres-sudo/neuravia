@@ -18,8 +18,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 
 interface WelcomeScreenProps {
 	patientId?: string;
@@ -44,26 +42,15 @@ const getProfessionFromPatient = (patient: any): string => {
 	return patient.job.type;
 };
 
-// Function to get emojis from patient data
-const getPatientEmojis = (patient: any): string[] => {
-	if (!patient?.emojis) return ["🧠", "🎯", "⭐"];
-	
-	try {
-		return JSON.parse(patient.emojis);
-	} catch {
-		return ["🧠", "🎯", "⭐"];
-	}
-};
-
 export const WelcomeScreen = ({ patientId, patient, lastBoostScore = 0 }: WelcomeScreenProps) => {
 	const { startSession } = useGameStore();
 	const [isStarting, setIsStarting] = useState(false);
 	const [showCalendar, setShowCalendar] = useState(false);
+	const [showSessionTypeModal, setShowSessionTypeModal] = useState(false);
 
 	// Determine game settings based on patient data and boost score
 	const difficulty = getDifficultyFromScore(lastBoostScore);
 	const profession = getProfessionFromPatient(patient);
-	const patientEmojis = getPatientEmojis(patient);
 
 	// Get profession-specific assets
 	const getProfessionAssets = () => {
@@ -91,10 +78,16 @@ export const WelcomeScreen = ({ patientId, patient, lastBoostScore = 0 }: Welcom
 		return baseAssets;
 	};
 
-	const handleStartGame = async () => {
+	const handleStartGame = () => {
+		if (!patientId || isStarting) return;
+		setShowSessionTypeModal(true);
+	};
+
+	const handleSessionTypeSelect = async (sessionType: "short" | "long") => {
 		if (!patientId) return;
 		
 		setIsStarting(true);
+		setShowSessionTypeModal(false);
 		
 		try {
 			const profile = {
@@ -103,8 +96,9 @@ export const WelcomeScreen = ({ patientId, patient, lastBoostScore = 0 }: Welcom
 				customAssets: getProfessionAssets(),
 			};
 
-			startSession("short", profile, patientId);
-			toast.success("Game session started! 🎮");
+			startSession(sessionType, profile, patientId);
+			const sessionsCount = sessionType === "short" ? 3 : 10;
+			toast.success(`${sessionType === "short" ? "Short" : "Long"} session started! Playing 4 games ${sessionsCount} times 🎮`);
 		} catch (error) {
 			toast.error("Failed to start game session");
 			console.error(error);
@@ -140,167 +134,41 @@ export const WelcomeScreen = ({ patientId, patient, lastBoostScore = 0 }: Welcom
 	const currentDifficulty = difficultyInfo[difficulty];
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-green-50">
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-green-50 flex items-center justify-center">
 
 			{/* Main content */}
 			<div className="container mx-auto px-6 py-10">
 				<div className="max-w-4xl mx-auto">
 					{/* Welcome header */}
-					<div className="text-center mb-4">
-						<div className="flex justify-center mb-4">
-							{patientEmojis.map((emoji, index) => (
-								<div
-									key={index}
-									className="text-3xl mx-1 animate-bounce"
-									style={{ animationDelay: `${index * 0.2}s` }}
-								>
-									{emoji}
-								</div>
-							))}
-						</div>
-						<h1 className="text-3xl font-bold text-gray-700 mb-2">
+					<div className="text-center mb-8">
+						<h1 className="text-4xl font-bold text-gray-700 mb-4">
 							Welcome back, {patient?.name?.split(' ')[0] || 'Friend'}!
 						</h1>
-						<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+						<p className="text-xl text-gray-600 max-w-2xl mx-auto">
 							Ready for some brain training? Let's keep your mind sharp and active!
 						</p>
 					</div>
 
-					{/* Game stats and info */}
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-						<Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-							<CardContent className="p-1">
-								<div className="flex items-center space-x-3 justify-center">
-									<div className="p-2 bg-blue-100 rounded-full">
-										<Target className="h-5 w-5 text-blue-600" />
-									</div>
-									<div>
-										<h3 className="font-semibold text-gray-800">Current Level</h3>
-										<p className="text-sm text-gray-600">{currentDifficulty.label}</p>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-
-						<Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-							<CardContent className="p-1">
-								<div className="flex items-center space-x-3 justify-center">
-									<div className="p-2 bg-green-100 rounded-full">
-										<Brain className="h-5 w-5 text-green-600" />
-									</div>
-									<div>
-										<h3 className="font-semibold text-gray-800">Boost Score</h3>
-										<p className="text-sm text-gray-600">{lastBoostScore.toFixed(0)}/100</p>
-									</div>
-								</div>
-								<Progress value={lastBoostScore} className="mt-3" />
-							</CardContent>
-						</Card>
-
-						<Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-							<CardContent className="p-1">
-								<div className="flex items-center space-x-3 justify-center">
-									<div className="p-2 bg-purple-100 rounded-full">
-										<Clock className="h-5 w-5 text-purple-600" />
-									</div>
-									<div>
-										<h3 className="font-semibold text-gray-800">Session Length</h3>
-										<p className="text-sm text-gray-600">4 games (~15 min)</p>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					</div>
-
 					{/* Main action buttons */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+					<div className="grid grid-cols-1 gap-8 max-w-2xl mx-auto mt-12">
 						{/* Start Game Button */}
-						<Card className="bg-gradient-to-br from-green-400 to-green-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-							<CardContent className="p-4 text-center">
-								<div className="mb-2">
-									<Gamepad2 className="h-10 w-10 text-white mx-auto mb-2" />
-									<h2 className="text-3xl font-bold text-white mb-2">Start Training</h2>
-									<p className="text-green-100 text-lg">
-										Begin your cognitive training session
-									</p>
-								</div>
-								
-								<div className="mb-4 p-4 bg-white/20 rounded-lg">
-									<h3 className="text-white font-semibold mb-2">Today's Settings</h3>
-									<div className="text-green-100 text-sm space-y-1">
-										<div className="flex justify-between">
-											<span>Difficulty:</span>
-											<span className="font-semibold">{currentDifficulty.label}</span>
-										</div>
-										<div className="flex justify-between">
-											<span>Games:</span>
-											<span className="font-semibold">4 different challenges</span>
-										</div>
-										<div className="flex justify-between">
-											<span>Focus:</span>
-											<span className="font-semibold capitalize">{profession}</span>
-										</div>
-									</div>
-								</div>
-
-								<Button
-									onClick={handleStartGame}
-									disabled={isStarting}
-									className="w-full bg-white text-green-600 hover:bg-green-50 font-bold py-4 text-lg rounded-xl transition-all duration-300"
-								>
+						<Card 
+							className={`bg-gradient-to-br from-green-400 to-green-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 ${
+								isStarting ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'
+							}`}
+							onClick={handleStartGame}
+						>
+							<CardContent className="p-8 text-center">
+								<div className="text-white font-bold text-4xl">
 									{isStarting ? (
-										<div className="flex items-center space-x-2">
-											<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+										<div className="flex items-center justify-center space-x-3">
+											<div className="animate-spin rounded-full h-8 w-8 border-b-4 border-white"></div>
 											<span>Starting...</span>
 										</div>
 									) : (
-										<div className="flex items-center space-x-2">
-											<Play className="h-4 w-4" />
-											<span>Start Training</span>
-										</div>
+										"START"
 									)}
-								</Button>
-							</CardContent>
-						</Card>
-
-						{/* Calendar Button */}
-						<Card className="bg-gradient-to-br from-orange-400 to-orange-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-							<CardContent className="p-4 text-center">
-								<div className="mb-2">
-									<Calendar className="h-10 w-10 text-white mx-auto mb-2" />
-									<h2 className="text-3xl font-bold text-white mb-2">Training Schedule</h2>
-									<p className="text-orange-100 text-lg">
-										Keep track of your sessions!
-									</p>
 								</div>
-								
-								<div className="mb-4 p-4 bg-white/20 rounded-lg">
-									<h3 className="text-white font-semibold mb-2">Recent Activity</h3>
-									<div className="text-orange-100 text-sm space-y-1">
-										<div className="flex justify-between">
-											<span>Next Session:</span>
-											<span className="font-semibold">-</span>
-										</div>
-										<div className="flex justify-between">
-											<span>Activities to be done:</span>
-											<span className="font-semibold">-</span>
-										</div>
-										<div className="flex justify-between">
-											<span>Streak:</span>
-											<span className="font-semibold">-</span>
-										</div>
-									</div>
-								</div>
-
-								<Button
-									onClick={() => setShowCalendar(true)}
-									className="w-full bg-white text-orange-600 hover:bg-orange-50 font-bold py-4 text-lg rounded-xl transition-all duration-300"
-								>
-									<div className="flex items-center space-x-2">
-										<Star className="h-4 w-4" />
-										<span>View Schedule</span>
-									</div>
-								</Button>
 							</CardContent>
 						</Card>
 					</div>
@@ -308,6 +176,67 @@ export const WelcomeScreen = ({ patientId, patient, lastBoostScore = 0 }: Welcom
 
 				</div>
 			</div>
+
+			{/* Session Type Selection Modal */}
+			{showSessionTypeModal && (
+				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+					<div className="bg-white rounded-3xl p-8 max-w-md mx-4 shadow-2xl">
+						<div className="text-center mb-6">
+							<div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+								<Clock className="h-8 w-8 text-white" />
+							</div>
+							<h3 className="text-2xl font-bold text-gray-800 mb-2">Choose Session Length</h3>
+							<p className="text-gray-600">Select how long you want to play today</p>
+						</div>
+						
+						<div className="space-y-4">
+							{/* Short Session Option */}
+							<button
+								onClick={() => handleSessionTypeSelect("short")}
+								disabled={isStarting}
+								className="w-full p-6 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								<div className="text-center">
+									<div className="text-3xl mb-2">⚡</div>
+									<div className="font-bold text-xl">Short Session</div>
+									<div className="text-green-100 text-sm">4 games × 3 rounds</div>
+									<div className="text-green-100 text-xs mt-1">~2 minutes</div>
+								</div>
+							</button>
+
+							{/* Long Session Option */}
+							<button
+								onClick={() => handleSessionTypeSelect("long")}
+								disabled={isStarting}
+								className="w-full p-6 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								<div className="text-center">
+									<div className="text-3xl mb-2">🚀</div>
+									<div className="font-bold text-xl">Long Session</div>
+									<div className="text-blue-100 text-sm">4 games × 10 rounds</div>
+									<div className="text-blue-100 text-xs mt-1">~10 minutes</div>
+								</div>
+							</button>
+						</div>
+
+						{/* Cancel Button */}
+						<button
+							onClick={() => setShowSessionTypeModal(false)}
+							disabled={isStarting}
+							className="w-full mt-4 p-3 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							Cancel
+						</button>
+						
+						{isStarting && (
+							<div className="mt-4 flex items-center justify-center space-x-2 text-gray-600">
+								<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+								<span>Starting session...</span>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
 
 			{/* Calendar modal placeholder */}
 			{showCalendar && (

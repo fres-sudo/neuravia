@@ -11,6 +11,7 @@ export const TodoListGame = () => {
 	const profile = useGameStore((state) => state.profile);
 	const completeGame = useGameStore((state) => state.completeGame);
 	const nextGame = useGameStore((state) => state.nextGame);
+	const session = useGameStore((state) => state.session); // Add session to track rounds
 
 	const [phase, setPhase] = useState("memorize");
 	const [originalTasks, setOriginalTasks] = useState<
@@ -22,6 +23,9 @@ export const TodoListGame = () => {
 	const [userOrder, setUserOrder] = useState<
 		Array<{ id: number; text: string; order: number }>
 	>([]);
+	const [timerHasStarted, setTimerHasStarted] = useState(false); // Track if timer has been started
+	const [gameResult, setGameResult] = useState<'correct' | 'incorrect' | null>(null); // Track game result
+	const [gameCompleted, setGameCompleted] = useState(false); // Track if game is completed
 
 	const tasks = useMemo(() => {
 		  return profile?.profession === "teacher"
@@ -37,10 +41,24 @@ export const TodoListGame = () => {
 				"📝 Write report",
 				"📞 Team meeting",
 			  ].slice(0, gameSettings.itemCount);
-		}, [profile?.profession, gameSettings.itemCount]);
+	}, [profile?.profession, gameSettings.itemCount]);
+
+	// Reset game state when a new round starts
+	useEffect(() => {
+		console.log("Resetting todo list game for round:", session?.currentRound);
+		setPhase("memorize");
+		setOriginalTasks([]);
+		setShuffledTasks([]);
+		setUserOrder([]);
+		setTimerHasStarted(false);
+		setGameResult(null);
+		setGameCompleted(false);
+		stopTimer();
+	}, [session?.currentRound, stopTimer]);
 
 	useEffect(() => {
-		if (phase === "memorize") {
+		if (phase === "memorize" && tasks.length > 0 && !timerHasStarted && !gameCompleted) {
+			console.log("Starting memorize phase with tasks:", tasks);
 			const tasksWithId = tasks.map((task, index) => ({
 				id: index,
 				text: task,
@@ -52,9 +70,11 @@ export const TodoListGame = () => {
 			// Start timer with a small delay to ensure proper initialization
 			setTimeout(() => {
 				startTimer(gameSettings.timerDuration);
+				setTimerHasStarted(true);
+				console.log("Timer started for memorize phase");
 			}, 100);
 		}
-	}, [phase, gameSettings.timerDuration, tasks, startTimer]);
+	}, [phase, gameSettings.timerDuration, tasks, startTimer, timerHasStarted, gameCompleted]);
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout | null = null;
@@ -65,8 +85,8 @@ export const TodoListGame = () => {
 			}, 1000);
 		}
 
-		// Handle phase transitions
-		if (timeRemaining === 0 && phase === "memorize") {
+		// Handle phase transitions - only if timer was actually started and is now finished
+		if (timeRemaining === 0 && phase === "memorize" && originalTasks.length > 0 && timerHasStarted && !timerActive) {
 			// Mescola i task
 			const shuffled = [...originalTasks].sort(() => Math.random() - 0.5);
 			setShuffledTasks(shuffled);
@@ -79,7 +99,7 @@ export const TodoListGame = () => {
 				clearInterval(interval);
 			}
 		};
-	}, [timerActive, timeRemaining, phase, tick, stopTimer, originalTasks]);
+	}, [timerActive, timeRemaining, phase, tick, stopTimer, originalTasks, timerHasStarted]);
 
 	const handleTaskClick = (task: {
 		id: number;
@@ -92,10 +112,18 @@ export const TodoListGame = () => {
 		setUserOrder(newOrder);
 
 		if (newOrder.length === originalTasks.length) {
-			// Check if order is correct
-			const isCorrect = newOrder.every(
-				(task, index) => task.order === index + 1
-			);
+			// Check if order is correct - user should select tasks in the original order (1,2,3,4...)
+			// originalTasks is sorted by order (1,2,3,4), so we check if user selected in that same sequence
+			const isCorrect = newOrder.every((selectedTask, selectionIndex) => {
+				// The task that should be selected at this position (0->order:1, 1->order:2, etc.)
+				const expectedOrder = selectionIndex + 1;
+				// Check if the selected task has the expected order number
+				return selectedTask.order === expectedOrder;
+			});
+			
+			console.log("User selection order:", newOrder.map(t => ({ text: t.text, order: t.order })));
+			console.log("Expected order:", originalTasks.map(t => ({ text: t.text, order: t.order })));
+			console.log("Is correct:", isCorrect);
 			
 			const rawData = {
 				gameType: "todo-list",
@@ -108,6 +136,8 @@ export const TodoListGame = () => {
 			};
 			
 			completeGame(isCorrect ? 15 : 8, rawData);
+			setGameResult(isCorrect ? 'correct' : 'incorrect');
+			setGameCompleted(true);
 			setPhase("complete");
 			setTimeout(() => {
 				nextGame();
@@ -146,6 +176,10 @@ export const TodoListGame = () => {
 						{shuffledTasks.map((task) => {
 							const isSelected = userOrder.find((t) => t.id === task.id);
 							const orderIndex = userOrder.findIndex((t) => t.id === task.id);
+							
+							// Check if this selection is correct - the selected task should have the right order number
+							// for the position it was selected in
+							const isSelectionCorrect = isSelected ? (task.order === orderIndex + 1) : false;
 
 							return (
 								<button
@@ -154,12 +188,12 @@ export const TodoListGame = () => {
 									disabled={!!isSelected}
 									className={`p-3 rounded-xl transition-all ${
 										isSelected
-											? "bg-green-200 opacity-50 cursor-not-allowed"
+											? `${isSelectionCorrect ? "bg-green-200" : "bg-red-200"} opacity-70 cursor-not-allowed`
 											: "bg-white hover:bg-blue-100 cursor-pointer shadow-md hover:shadow-lg"
 									}`}>
 									<div className="flex items-center">
 										{isSelected && (
-											<span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">
+											<span className={`${isSelectionCorrect ? "bg-green-500" : "bg-red-500"} text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3`}>
 												{orderIndex + 1}
 											</span>
 										)}
@@ -172,7 +206,12 @@ export const TodoListGame = () => {
 				</div>
 			)}
 
-			{phase === "complete" && <GameComplete />}
+			{phase === "complete" && (
+				<GameComplete 
+					message={gameResult === 'correct' ? "Perfect! Right order! 🎯" : "Good try! Wrong order 📝"} 
+					isCorrect={gameResult === 'correct'}
+				/>
+			)}
 		</div>
 	);
 };

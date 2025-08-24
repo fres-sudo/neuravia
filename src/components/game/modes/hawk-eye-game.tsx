@@ -11,6 +11,7 @@ export const HawkEyeGame = () => {
 	const profile = useGameStore((state) => state.profile);
 	const completeGame = useGameStore((state) => state.completeGame);
 	const nextGame = useGameStore((state) => state.nextGame);
+	const session = useGameStore((state) => state.session); // Add session to track rounds
 
 	const [phase, setPhase] = useState("memorize");
 	const [targetIndex, setTargetIndex] = useState(0);
@@ -31,6 +32,15 @@ export const HawkEyeGame = () => {
 	  }
 	  return ["🦅", "🐦", "🦜", "🕊️"].slice(0, gameSettings.itemCount);
 	}, [profile?.customAssets, gameSettings.itemCount]);
+
+	// Reset game state when a new round starts
+	useEffect(() => {
+		setPhase("memorize");
+		setTargetIndex(0);
+		setBirds([]);
+		setSelectedBird(null);
+		stopTimer();
+	}, [session?.currentRound, stopTimer]);
 
 	useEffect(() => {
 		// Reset game state when component mounts or phase changes to memorize
@@ -122,7 +132,7 @@ export const HawkEyeGame = () => {
 	return (
 		<div className="relative w-full h-96 bg-gradient-to-br from-sky-200 to-cyan-200 rounded-2xl border-4 border-sky-300 overflow-hidden">
 			{phase === "memorize" && (
-				<div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold animate-bounce">
+				<div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold animate-bounce z-10">
 					Watch the highlighted bird! 👁️
 				</div>
 			)}
@@ -145,16 +155,16 @@ export const HawkEyeGame = () => {
 			))}
 
 			{phase === "moving" && (
-				<div className="absolute inset-0 flex items-center justify-center">
-					<div className="bg-black bg-opacity-50 text-white px-8 py-4 rounded-2xl text-2xl font-bold">
+				<div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10">
+					<div className="bg-black bg-opacity-50 text-white px-6 py-3 rounded-xl text-xl font-bold shadow-lg">
 						Keep watching! 👀
 					</div>
 				</div>
 			)}
 
 			{phase === "guessing" && (
-				<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-					<div className="bg-blue-500 text-white px-8 py-4 rounded-2xl text-2xl font-bold">
+				<div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-10">
+					<div className="bg-blue-500 text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg">
 						Click the bird you were watching!
 					</div>
 				</div>

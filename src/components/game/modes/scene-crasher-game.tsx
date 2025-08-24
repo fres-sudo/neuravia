@@ -11,6 +11,7 @@ export const SceneCrasherGame = () => {
 	const profile = useGameStore((state) => state.profile);
 	const completeGame = useGameStore((state) => state.completeGame);
 	const nextGame = useGameStore((state) => state.nextGame);
+	const session = useGameStore((state) => state.session); // Add session to track rounds
 
 	const [phase, setPhase] = useState("memorize"); // "memorize" -> "hidden" -> "playing" -> "complete" -> "wrong"
 	const [originalItems, setOriginalItems] = useState<
@@ -19,17 +20,32 @@ export const SceneCrasherGame = () => {
 	const [finalItems, setFinalItems] = useState<
 		Array<{ id: number; icon: string; x: number; y: number; isNew?: boolean }>
 	>([]);
+	const [timerHasStarted, setTimerHasStarted] = useState(false); // Track if timer has been started
 
 	// Get the base item icon (all items will be identical)
 	const baseIcon = profile?.customAssets["scene-crasher"]?.items?.[0] || "⭐";
 
+	// Reset game state when component mounts or when a new round starts
+	useEffect(() => {
+		stopTimer();
+		setPhase("memorize");
+		setOriginalItems([]);
+		setFinalItems([]);
+		setTimerHasStarted(false);
+	}, [stopTimer, session?.currentRound]); // Add currentRound as dependency
+
 	useEffect(() => {
 		if (phase === "memorize") {
 			// Generate N identical items in random positions
-			const itemCount = gameSettings.itemCount;
+			// Ensure at least 2 items: minimum 1 original + 1 new that will be added later
+			const itemCount = Math.max(2, gameSettings.itemCount);
 			const items: { id: number; icon: string; x: number; y: number }[] = [];
 
-			for (let i = 0; i < itemCount; i++) {
+			// Generate original items that will be shown during memorization
+			// We'll show (itemCount - 1) items during memorization, then add 1 new item
+			const originalItemsCount = itemCount - 1;
+
+			for (let i = 0; i < originalItemsCount; i++) {
 				items.push({
 					id: i,
 					icon: baseIcon,
@@ -43,6 +59,7 @@ export const SceneCrasherGame = () => {
 			// Start 5-second timer for memorization
 			setTimeout(() => {
 				startTimer(5);
+				setTimerHasStarted(true);
 			}, 100);
 		}
 	}, [phase, startTimer, gameSettings.itemCount, baseIcon]);
@@ -56,8 +73,8 @@ export const SceneCrasherGame = () => {
 			}, 1000);
 		}
 
-		// Handle phase transitions
-		if (timeRemaining === 0 && phase === "memorize") {
+		// Handle phase transitions - only if timer was actually started and is now finished
+		if (timeRemaining === 0 && phase === "memorize" && timerHasStarted && !timerActive) {
 			// Hide all items for 1 second
 			setPhase("hidden");
 			stopTimer();
@@ -77,8 +94,14 @@ export const SceneCrasherGame = () => {
 					...originalItems.map((item) => ({ ...item, isNew: false })),
 					newItem,
 				];
+				
+				// Set items first, then change phase to ensure items are rendered before instruction
 				setFinalItems(allItems);
-				setPhase("playing");
+				
+				// Small delay to ensure items are rendered before showing instruction
+				setTimeout(() => {
+					setPhase("playing");
+				}, 50);
 			}, 1000);
 		}
 
@@ -95,6 +118,7 @@ export const SceneCrasherGame = () => {
 		stopTimer,
 		originalItems,
 		baseIcon,
+		timerHasStarted,
 	]);
 
 	const handleItemClick = (clickedItem: {
@@ -172,7 +196,7 @@ export const SceneCrasherGame = () => {
 			)}
 
 			{/* Playing Phase: Show N+1 items, player must click the NEW one */}
-			{phase === "playing" && (
+			{phase === "playing" && finalItems.length > 0 && (
 				<>
 					<div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold">
 						Click the NEW item! 🎯
@@ -190,6 +214,13 @@ export const SceneCrasherGame = () => {
 						</button>
 					))}
 				</>
+			)}
+
+			{/* Loading state during playing phase setup */}
+			{phase === "playing" && finalItems.length === 0 && (
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="text-2xl font-bold text-gray-700">Loading...</div>
+				</div>
 			)}
 
 			{/* Complete Phase - Correct Answer */}
