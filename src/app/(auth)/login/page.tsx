@@ -18,7 +18,6 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { GoogleIcon } from "../layout";
 import { signIn } from "@/server/auth/auth-client";
 
 const loginSchema = z.object({
@@ -64,25 +63,6 @@ const LoginPage = () => {
 		} catch (err) {
 			setError("An unexpected error occurred");
 			console.error("Login error:", err);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	const handleGoogleSignIn = async () => {
-		try {
-			setIsLoading(true);
-			const result = await signIn.social({
-				provider: "google",
-				callbackURL: "/dashboard",
-			});
-
-			if (result.error) {
-				setError(result.error.message || "Google login failed");
-			}
-		} catch (error) {
-			console.error("Google sign in error:", error);
-			setError("An error occurred during Google login");
 		} finally {
 			setIsLoading(false);
 		}
@@ -215,22 +195,6 @@ const LoginPage = () => {
 					</Button>
 				</form>
 			</Form>
-
-			<div className="relative flex animate-delay-700 animate-element items-center justify-center">
-				<span className="w-full border-border border-t" />
-				<span className="absolute bg-background px-4 text-muted-foreground text-sm">
-					Or continue with
-				</span>
-			</div>
-
-			<Button
-				variant="outline"
-				onClick={handleGoogleSignIn}
-				disabled={isLoading || form.formState.isSubmitting}
-				className="w-full animate-delay-800 animate-element rounded-2xl border-border py-6 hover:bg-secondary">
-				<GoogleIcon />
-				Continue with Google
-			</Button>
 
 			<p className="animate-delay-900 animate-element text-center text-muted-foreground text-sm">
 				New to our platform?{" "}
