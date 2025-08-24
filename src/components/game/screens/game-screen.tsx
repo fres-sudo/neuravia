@@ -42,14 +42,14 @@ export const GameScreen = () => {
 			if (patientId) {
 				saveSessionScore(patientId, sessionData)
 					.then(() => {
-						// Get caregiver ID from URL or store - you'll need to adjust this based on your routing structure
+						// Get caregiver ID from URL path: /room/caregiverId/patientId
 						const pathParts = window.location.pathname.split('/');
-						const caregiverIndex = pathParts.indexOf('caregiver');
+						const roomIndex = pathParts.indexOf('room');
 						
-						if (caregiverIndex !== -1 && caregiverIndex + 2 < pathParts.length) {
-							const caregiverId = pathParts[caregiverIndex + 1];
-							// Redirect to caregiver/patient page
-							router.push(`/caregiver/${caregiverId}/${patientId}`);
+						if (roomIndex !== -1 && roomIndex + 1 < pathParts.length) {
+							const caregiverId = pathParts[roomIndex + 1];
+							// Redirect back to the room welcome screen
+							router.push(`/room/${caregiverId}/${patientId}`);
 						} else {
 							// Fallback redirect if we can't determine caregiver ID
 							console.warn('Could not determine caregiver ID from URL');
@@ -60,11 +60,11 @@ export const GameScreen = () => {
 						console.error('Failed to save session, but redirecting anyway:', error);
 						// Still redirect even if save failed
 						const pathParts = window.location.pathname.split('/');
-						const caregiverIndex = pathParts.indexOf('caregiver');
+						const roomIndex = pathParts.indexOf('room');
 						
-						if (caregiverIndex !== -1 && caregiverIndex + 2 < pathParts.length) {
-							const caregiverId = pathParts[caregiverIndex + 1];
-							router.push(`/caregiver/${caregiverId}/${patientId}`);
+						if (roomIndex !== -1 && roomIndex + 1 < pathParts.length) {
+							const caregiverId = pathParts[roomIndex + 1];
+							router.push(`/room/${caregiverId}/${patientId}`);
 						} else {
 							router.push('/dashboard');
 						}
