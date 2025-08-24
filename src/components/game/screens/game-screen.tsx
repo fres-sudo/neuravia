@@ -105,17 +105,22 @@ export const GameScreen = () => {
 	// Show completion message while redirecting
 	if (isSessionComplete) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 flex items-center justify-center">
-				<div className="text-center p-8 bg-white rounded-2xl shadow-lg">
-					<h2 className="text-3xl font-bold text-gray-700 mb-4">
-						Great Job! 🎉
-					</h2>
-					<p className="text-lg text-gray-600 mb-4">
-						Session completed successfully!
-					</p>
-					<p className="text-sm text-gray-500 mt-2">If you want to play again, reload the page!</p>
-				</div>
-			</div>
+		   <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 flex items-center justify-center">
+			  <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+				 <h2 className="text-3xl font-bold text-gray-700 mb-4">
+					Great Job! 🎉
+				 </h2>
+				 <p className="text-lg text-gray-600 mb-4">
+					Session completed successfully!
+				 </p>
+				 <button
+					onClick={() => window.location.reload()}
+					className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+				 >
+					Back to Homepage
+				 </button>
+			  </div>
+		   </div>
 		);
 	}
 
