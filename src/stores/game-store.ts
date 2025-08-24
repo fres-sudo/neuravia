@@ -57,20 +57,26 @@ interface GameStore {
 	isPlaying: boolean;
 	showWelcome: boolean;
 	showInstructions: boolean;
+	gameplayStarted: boolean;
 	timeRemaining: number;
 	timerActive: boolean;
 	gameSettings: GameSettings;
 	patientId?: string;
-	startSession: (mode: GameMode, profile: PlayerProfile, patientId?: string) => void;
+	startSession: (
+		mode: GameMode,
+		profile: PlayerProfile,
+		patientId?: string
+	) => void;
 	endSession: () => void;
 	startGame: (gameType: GameType) => void;
+	startActualGameplay: () => void;
 	completeGame: (score: number, rawData?: any) => void;
 	nextGame: () => void;
 	startTimer: (duration: number) => void;
 	stopTimer: () => void;
 	tick: () => void;
 	updateGameSettings: (level: DifficultyLevel, gameType: GameType) => void;
-	showGameInstructions: (gameType: GameType) => void;
+	showGameInstructions: () => void;
 	hideInstructions: () => void;
 }
 
@@ -83,6 +89,7 @@ const useGameStore = create<GameStore>()(
 			isPlaying: false,
 			showWelcome: true,
 			showInstructions: false,
+			gameplayStarted: false,
 			timeRemaining: 0,
 			timerActive: false,
 			gameSettings: {
@@ -125,23 +132,29 @@ const useGameStore = create<GameStore>()(
 					showWelcome: true,
 					timerActive: false,
 					showInstructions: false,
+					gameplayStarted: false,
 					patientId: undefined,
 				});
 			},
 			startGame: (gameType) => {
 				const { profile } = get();
 				if (!profile) return;
-				set({ currentGame: gameType });
+				set({ currentGame: gameType, gameplayStarted: false });
 				get().updateGameSettings(profile.difficultyLevel, gameType);
 				const firstTime = !get().session?.gamesCompleted.includes(gameType);
 				if (firstTime) {
-					get().showGameInstructions(gameType);
+					get().showGameInstructions();
+				} else {
+					set({ gameplayStarted: true });
 				}
+			},
+			startActualGameplay: () => {
+				set({ gameplayStarted: true });
 			},
 			completeGame: (gameScore, rawData) => {
 				const { session, currentGame } = get();
 				if (!session || !currentGame) return;
-				
+
 				// Store raw data for this game
 				const updatedRawData = {
 					...session.rawData,
@@ -173,38 +186,37 @@ const useGameStore = create<GameStore>()(
 			nextGame: () => {
 				const { session } = get();
 				if (!session) return;
-				
+
 				const gameOrder: GameType[] = [
 					"scene-crasher",
-					"hawk-eye", 
+					"hawk-eye",
 					"todo-list",
 					"flashing-memory",
 				];
-				
+
 				// Calculate rounds per game based on session type
 				const roundsPerGame = session.mode === "short" ? 3 : 10;
 				const totalGames = 4;
-				
+
 				// Calculate which game we should be on and which round within that game
-				const currentGameType = Math.floor((session.currentRound - 1) / roundsPerGame);
 				const nextRound = session.currentRound + 1;
 				const nextGameType = Math.floor((nextRound - 1) / roundsPerGame);
-				
+
 				// Check if session is complete
 				if (nextRound > session.totalRounds) {
 					get().endSession();
 					return;
 				}
-				
+
 				// Update session state
-				set((state) => ({
+				set({
 					session: {
 						...session,
 						currentGameIndex: Math.min(nextGameType, totalGames - 1),
 						currentRound: nextRound,
 					},
-				}));
-				
+				});
+
 				// Start the appropriate game
 				const gameToStart = gameOrder[Math.min(nextGameType, totalGames - 1)]!;
 				get().startGame(gameToStart);
@@ -243,13 +255,13 @@ const useGameStore = create<GameStore>()(
 					},
 				});
 			},
-			showGameInstructions: (gameType) => {
+			showGameInstructions: () => {
 				set({ showInstructions: true });
 			},
 			hideInstructions: () => {
 				set({ showInstructions: false });
+				get().startActualGameplay();
 			},
-
 		}),
 		{ name: "alzheimer-game-store" }
 	)

@@ -19,6 +19,7 @@ export const FlashingMemoryGame = () => {
 	);
 	const nextGame = useGameStore((state: { nextGame: any }) => state.nextGame);
 	const session = useGameStore((state: { session: any }) => state.session); // Add session to track rounds
+	const gameplayStarted = useGameStore((state: { gameplayStarted: any }) => state.gameplayStarted);
 
 	const [phase, setPhase] = useState("memorize");
 	const [sequence, setSequence] = useState<Array<{
@@ -49,7 +50,7 @@ export const FlashingMemoryGame = () => {
 	}, [session?.currentRound, stopTimer]);
 
 	useEffect(() => {
-		if (phase === "memorize" && sequence.length === 0 && !timerHasStarted && gameSettings?.itemCount && gameSettings?.timerDuration) {
+		if (phase === "memorize" && sequence.length === 0 && !timerHasStarted && gameSettings?.itemCount && gameSettings?.timerDuration && gameplayStarted) {
 			console.log("Starting memorize phase for flashing memory with settings:", gameSettings);
 			// Generate random sequence
 			const positions: number[] = [];
@@ -78,7 +79,7 @@ export const FlashingMemoryGame = () => {
 				setTimerHasStarted(true);
 			}, 300);
 		}
-	}, [phase, gameSettings?.itemCount, gameSettings?.timerDuration, gridSize, startTimer, timerHasStarted, sequence.length]);
+	}, [phase, gameSettings?.itemCount, gameSettings?.timerDuration, gridSize, startTimer, timerHasStarted, sequence.length, gameplayStarted]);
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout | null = null;
@@ -209,14 +210,19 @@ export const FlashingMemoryGame = () => {
 	return (
 		<div className="relative w-full h-90  bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl border-4 border-purple-300 overflow-hidden">
 			<div className="absolute inset-0 flex flex-col items-center justify-center">
-				{!gameSettings?.itemCount || !gameSettings?.timerDuration ? (
+				{!gameplayStarted ? (
+					<div className="text-center text-gray-700">
+						<div className="text-4xl mb-4">⏳</div>
+						<div className="text-2xl font-bold">Waiting for instructions to complete...</div>
+					</div>
+				) : !gameSettings?.itemCount || !gameSettings?.timerDuration ? (
 					<div className="text-center">
 						<div className="text-2xl font-bold text-gray-700 mb-4">Loading game...</div>
 						<div className="animate-spin rounded-full h-8 w-8 border-b-4 border-purple-500 mx-auto"></div>
 					</div>
 				) : (
 					<>
-						{phase === "memorize" && (
+						{phase === "memorize" && gameplayStarted && (
 							<div className="mb-6 text-center">
 								<h3 className="text-2xl font-bold text-gray-700 mb-2">
 									Remember the numbers and their positions!
@@ -235,7 +241,7 @@ export const FlashingMemoryGame = () => {
 							</div>
 						)}
 
-						{phase === "playing" && (
+						{phase === "playing" && gameplayStarted && (
 							<div className="mb-6 text-center">
 								<h3 className="text-2xl font-bold text-gray-700 mb-2">
 									Click the squares in numerical order!
@@ -246,12 +252,12 @@ export const FlashingMemoryGame = () => {
 							</div>
 						)}
 
-						<div className="grid grid-cols-3 gap-2">{renderGrid()}</div>
+						{gameplayStarted && <div className="grid grid-cols-3 gap-2">{renderGrid()}</div>}
 					</>
 				)}
 			</div>
 
-			{phase === "complete" && (
+			{phase === "complete" && gameplayStarted && (
 				<GameComplete 
 					message={gameResult === 'correct' ? "Perfect memory! 🧠" : "Good try! Remember the sequence! 💭"} 
 					isCorrect={gameResult === 'correct'}

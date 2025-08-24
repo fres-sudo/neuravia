@@ -12,6 +12,7 @@ export const SceneCrasherGame = () => {
 	const completeGame = useGameStore((state) => state.completeGame);
 	const nextGame = useGameStore((state) => state.nextGame);
 	const session = useGameStore((state) => state.session); // Add session to track rounds
+	const gameplayStarted = useGameStore((state) => state.gameplayStarted);
 
 	const [phase, setPhase] = useState("memorize"); // "memorize" -> "hidden" -> "playing" -> "complete" -> "wrong"
 	const [originalItems, setOriginalItems] = useState<
@@ -35,7 +36,7 @@ export const SceneCrasherGame = () => {
 	}, [stopTimer, session?.currentRound]); // Add currentRound as dependency
 
 	useEffect(() => {
-		if (phase === "memorize") {
+		if (phase === "memorize" && gameplayStarted) {
 			// Generate N identical items in random positions
 			// Ensure at least 2 items: minimum 1 original + 1 new that will be added later
 			const itemCount = Math.max(2, gameSettings.itemCount);
@@ -62,7 +63,7 @@ export const SceneCrasherGame = () => {
 				setTimerHasStarted(true);
 			}, 100);
 		}
-	}, [phase, startTimer, gameSettings.itemCount, baseIcon]);
+	}, [phase, startTimer, gameSettings.itemCount, baseIcon, gameplayStarted]);
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout | null = null;
@@ -74,7 +75,12 @@ export const SceneCrasherGame = () => {
 		}
 
 		// Handle phase transitions - only if timer was actually started and is now finished
-		if (timeRemaining === 0 && phase === "memorize" && timerHasStarted && !timerActive) {
+		if (
+			timeRemaining === 0 &&
+			phase === "memorize" &&
+			timerHasStarted &&
+			!timerActive
+		) {
 			// Hide all items for 1 second
 			setPhase("hidden");
 			stopTimer();
@@ -94,10 +100,10 @@ export const SceneCrasherGame = () => {
 					...originalItems.map((item) => ({ ...item, isNew: false })),
 					newItem,
 				];
-				
+
 				// Set items first, then change phase to ensure items are rendered before instruction
 				setFinalItems(allItems);
-				
+
 				// Small delay to ensure items are rendered before showing instruction
 				setTimeout(() => {
 					setPhase("playing");
@@ -128,21 +134,6 @@ export const SceneCrasherGame = () => {
 		y: number;
 		isNew?: boolean;
 	}) => {
-		const rawData = {
-			gameType: "scene-crasher",
-			roundNumber: gameSettings.itemCount,
-			correctAnswer: clickedItem.isNew,
-			clickedItem: {
-				id: clickedItem.id,
-				x: clickedItem.x,
-				y: clickedItem.y,
-				isNew: clickedItem.isNew,
-			},
-			originalItems: originalItems.length,
-			totalItems: finalItems.length,
-			timeSpent: 5 - timeRemaining, // Time spent memorizing
-		};
-
 		if (clickedItem.isNew) {
 			// Correct! Player found the new item
 			completeGame(15);
@@ -167,81 +158,104 @@ export const SceneCrasherGame = () => {
 
 	return (
 		<div
-			className={`relative w-full h-90  ${backgroundClass} rounded-2xl border-4 border-amber-300 overflow-hidden`}>
-			{/* Memorize Phase: Show N identical items */}
-			{phase === "memorize" && (
-				<>
-					<div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-full text-lg font-bold">
-						Memorize these positions! ({timeRemaining}s)
-					</div>
-					{originalItems.map((item) => (
-						<div
-							key={item.id}
-							className="absolute text-4xl transform -translate-x-1/2 -translate-y-1/2"
-							style={{
-								left: `${item.x}%`,
-								top: `${item.y}%`,
-							}}>
-							{item.icon}
+			className={`relative w-full h-90 ${backgroundClass} rounded-2xl border-4 border-amber-300 overflow-hidden`}>
+			{/* Waiting for gameplay to start */}
+			{!gameplayStarted && (
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="text-center text-gray-700">
+						<div className="text-4xl mb-4">⏳</div>
+						<div className="text-2xl font-bold">
+							Waiting for instructions to complete...
 						</div>
-					))}
-				</>
-			)}
-
-			{/* Hidden Phase: Empty screen for 1 second */}
-			{phase === "hidden" && (
-				<div className="absolute inset-0 flex items-center justify-center">
-					<div className="text-2xl font-bold text-gray-700">Get ready...</div>
+					</div>
 				</div>
 			)}
 
-			{/* Playing Phase: Show N+1 items, player must click the NEW one */}
-			{phase === "playing" && finalItems.length > 0 && (
+			{/* Game phases - only render when gameplay has started */}
+			{gameplayStarted && (
 				<>
-					<div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold">
-						Click the NEW item! 🎯
-					</div>
-					{finalItems.map((item) => (
-						<button
-							key={item.id}
-							onClick={() => handleItemClick(item)}
-							className="absolute text-4xl transform -translate-x-1/2 -translate-y-1/2 hover:scale-110 transition-transform cursor-pointer"
-							style={{
-								left: `${item.x}%`,
-								top: `${item.y}%`,
-							}}>
-							{item.icon}
-						</button>
-					))}
+					{/* Memorize Phase: Show N identical items */}
+					{phase === "memorize" && (
+						<>
+							<div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-full text-lg font-bold">
+								Memorize these positions! ({timeRemaining}s)
+							</div>
+							{originalItems.map((item) => (
+								<div
+									key={item.id}
+									className="absolute text-4xl transform -translate-x-1/2 -translate-y-1/2"
+									style={{
+										left: `${item.x}%`,
+										top: `${item.y}%`,
+									}}>
+									{item.icon}
+								</div>
+							))}
+						</>
+					)}
+
+					{/* Hidden Phase: Empty screen for 1 second */}
+					{phase === "hidden" && (
+						<div className="absolute inset-0 flex items-center justify-center">
+							<div className="text-2xl font-bold text-gray-700">
+								Get ready...
+							</div>
+						</div>
+					)}
+
+					{/* Playing Phase: Show N+1 items, player must click the NEW one */}
+					{phase === "playing" && (
+						<>
+							<div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold">
+								Click the NEW item! 🎯
+							</div>
+
+							{finalItems.length > 0 ? (
+								// Show interactive items when ready
+								finalItems.map((item) => (
+									<button
+										key={item.id}
+										onClick={() => handleItemClick(item)}
+										className="absolute text-4xl transform -translate-x-1/2 -translate-y-1/2 hover:scale-110 transition-transform cursor-pointer"
+										style={{
+											left: `${item.x}%`,
+											top: `${item.y}%`,
+										}}>
+										{item.icon}
+									</button>
+								))
+							) : (
+								// Show loading state while setting up
+								<div className="absolute inset-0 flex items-center justify-center">
+									<div className="text-2xl font-bold text-gray-700">
+										Loading...
+									</div>
+								</div>
+							)}
+						</>
+					)}
+
+					{/* Complete Phase - Correct Answer */}
+					{phase === "complete" && (
+						<div className="absolute inset-0 flex items-center justify-center bg-green-400 bg-opacity-90">
+							<div className="text-center text-white">
+								<div className="text-6xl mb-4">🎉</div>
+								<p className="text-3xl font-bold">Perfect! You found it!</p>
+							</div>
+						</div>
+					)}
+
+					{/* Wrong Phase - Incorrect Answer */}
+					{phase === "wrong" && (
+						<div className="absolute inset-0 flex items-center justify-center bg-red-400 bg-opacity-90">
+							<div className="text-center text-white">
+								<div className="text-4xl mb-3">❌</div>
+								<p className="text-2xl font-bold">Wrong item!</p>
+								<p className="text-lg mt-2">That was an original item.</p>
+							</div>
+						</div>
+					)}
 				</>
-			)}
-
-			{/* Loading state during playing phase setup */}
-			{phase === "playing" && finalItems.length === 0 && (
-				<div className="absolute inset-0 flex items-center justify-center">
-					<div className="text-2xl font-bold text-gray-700">Loading...</div>
-				</div>
-			)}
-
-			{/* Complete Phase - Correct Answer */}
-			{phase === "complete" && (
-				<div className="absolute inset-0 flex items-center justify-center bg-green-400 bg-opacity-90">
-					<div className="text-center text-white">
-						<div className="text-6xl mb-4">🎉</div>
-						<p className="text-3xl font-bold">Perfect! You found it!</p>
-					</div>
-				</div>
-			)}
-
-			{/* Wrong Phase - Incorrect Answer */}
-			{phase === "wrong" && (
-				<div className="absolute inset-0 flex items-center justify-center bg-red-400 bg-opacity-90">
-					<div className="text-center text-white">
-						<div className="text-4xl mb-3">❌</div>
-						<p className="text-2xl font-bold">Wrong item!</p>
-						<p className="text-lg mt-2">That was an original item.</p>
-					</div>
-				</div>
 			)}
 		</div>
 	);
