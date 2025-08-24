@@ -207,7 +207,7 @@ export const FlashingMemoryGame = () => {
 	};
 
 	return (
-		<div className="relative w-full h-96 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl border-4 border-purple-300 overflow-hidden">
+		<div className="relative w-full h-90  bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl border-4 border-purple-300 overflow-hidden">
 			<div className="absolute inset-0 flex flex-col items-center justify-center">
 				{!gameSettings?.itemCount || !gameSettings?.timerDuration ? (
 					<div className="text-center">

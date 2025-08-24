@@ -146,7 +146,7 @@ export const TodoListGame = () => {
 	};
 
 	return (
-		<div className="relative w-full h-96 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-4 border-yellow-300 overflow-hidden">
+		<div className="relative w-full h-90  bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-4 border-yellow-300 overflow-hidden">
 			{phase === "memorize" && (
 				<div className="absolute inset-4 flex flex-col justify-center">
 					<h3 className="text-2xl font-bold text-center mb-6 text-gray-700">

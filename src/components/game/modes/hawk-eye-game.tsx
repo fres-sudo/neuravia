@@ -130,7 +130,7 @@ export const HawkEyeGame = () => {
 	};
 
 	return (
-		<div className="relative w-full h-96 bg-gradient-to-br from-sky-200 to-cyan-200 rounded-2xl border-4 border-sky-300 overflow-hidden">
+		<div className="relative w-full h-90  bg-gradient-to-br from-sky-200 to-cyan-200 rounded-2xl border-4 border-sky-300 overflow-hidden">
 			{phase === "memorize" && (
 				<div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold animate-bounce z-10">
 					Watch the highlighted bird! 👁️

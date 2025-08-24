@@ -167,7 +167,7 @@ export const SceneCrasherGame = () => {
 
 	return (
 		<div
-			className={`relative w-full h-66 ${backgroundClass} rounded-2xl border-4 border-amber-300 overflow-hidden`}>
+			className={`relative w-full h-90  ${backgroundClass} rounded-2xl border-4 border-amber-300 overflow-hidden`}>
 			{/* Memorize Phase: Show N identical items */}
 			{phase === "memorize" && (
 				<>
