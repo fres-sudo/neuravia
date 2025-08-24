@@ -1,3 +1,5 @@
+// In game-screen.tsx, update the session completion effect:
+
 import { useGameStore, type GameType } from "@/stores/game-store";
 import { SceneCrasherGame } from "../modes/scene-crasher-game";
 import { GameTimer } from "../game-timer";
@@ -8,40 +10,100 @@ import { GameTitle } from "../game-title";
 import { FlashingMemoryGame } from "../modes/flashing-memory-game";
 import { TodoListGame } from "../modes/todo-list-game";
 import { HawkEyeGame } from "../modes/hawk-eye-game";
+import { useGameScoring } from "@/hooks/use-game-scoring";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Add this import
 
 export const GameScreen = () => {
 	const isPlaying = useGameStore((state) => state.isPlaying);
 	const currentGame = useGameStore((state) => state.currentGame);
+	const session = useGameStore((state) => state.session);
+	const patientId = useGameStore((state) => state.patientId);
+	const { saveSessionScore } = useGameScoring();
+	
+	const router = useRouter(); // Add router hook
+	const [isSessionComplete, setIsSessionComplete] = useState(false);
+
+	// Handle session completion
+	useEffect(() => {
+		if (session && session.currentRound > session.totalRounds && !isSessionComplete) {
+			setIsSessionComplete(true);
+			
+			// Session is complete, save the score
+			const sessionData = {
+				totalScore: session.score,
+				averageScore: session.score / Math.max(session.gamesCompleted.length, 1),
+				sessionDuration: Date.now() - session.startTime.getTime(),
+				gamesCompleted: session.gamesCompleted,
+				rawData: session.rawData,
+				sessionMode: session.mode,
+			};
+
+			if (patientId) {
+				saveSessionScore(patientId, sessionData)
+					.then(() => {
+						// Get caregiver ID from URL or store - you'll need to adjust this based on your routing structure
+						const pathParts = window.location.pathname.split('/');
+						const caregiverIndex = pathParts.indexOf('caregiver');
+						
+						if (caregiverIndex !== -1 && caregiverIndex + 2 < pathParts.length) {
+							const caregiverId = pathParts[caregiverIndex + 1];
+							// Redirect to caregiver/patient page
+							router.push(`/caregiver/${caregiverId}/${patientId}`);
+						} else {
+							// Fallback redirect if we can't determine caregiver ID
+							console.warn('Could not determine caregiver ID from URL');
+							router.push('/dashboard'); // or wherever you want to redirect as fallback
+						}
+					})
+					.catch((error) => {
+						console.error('Failed to save session, but redirecting anyway:', error);
+						// Still redirect even if save failed
+						const pathParts = window.location.pathname.split('/');
+						const caregiverIndex = pathParts.indexOf('caregiver');
+						
+						if (caregiverIndex !== -1 && caregiverIndex + 2 < pathParts.length) {
+							const caregiverId = pathParts[caregiverIndex + 1];
+							router.push(`/caregiver/${caregiverId}/${patientId}`);
+						} else {
+							router.push('/dashboard');
+						}
+					});
+			}
+		}
+	}, [session, patientId, saveSessionScore, router, isSessionComplete]);
 
 	if (!isPlaying) return null;
+
+	// Show completion message while redirecting
+	if (isSessionComplete) {
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 flex items-center justify-center">
+				<div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+					<h2 className="text-3xl font-bold text-gray-700 mb-4">
+						Great Job! 🎉
+					</h2>
+					<p className="text-lg text-gray-600 mb-4">
+						Session completed successfully!
+					</p>
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+					<p className="text-sm text-gray-500 mt-2">Saving your progress...</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 space-y-6 pt-10">
 			<ProgressBar />
-
-			{/* Game Title - positioned between progress bar and main content */}
 			<GameTitle />
 
-			{/* Main content area - accounting for fixed progress bar */}
-			<div className=" pt-32 pb-8 px-8 flex items-center justify-center">
+			<div className="flex-1 px-8 py-4 flex items-center justify-center">
 				<div className="w-full max-w-4xl">
 					{currentGame === "scene-crasher" && <SceneCrasherGame />}
 					{currentGame === "flashing-memory" && <FlashingMemoryGame />}
 					{currentGame === "hawk-eye" && <HawkEyeGame />}
 					{currentGame === "todo-list" && <TodoListGame />}
-					{/* Altri giochi verranno implementati qui */}
-					{false && (
-						<div className="text-center p-16 bg-white rounded-2xl shadow-lg">
-							<h2 className="text-3xl font-bold text-gray-700 mb-4 capitalize">
-								{currentGame?.replace("-", " ")} Coming Soon
-							</h2>
-							<button
-								onClick={() => useGameStore.getState().nextGame()}
-								className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-2xl">
-								Skip to Next Game
-							</button>
-						</div>
-					)}
 				</div>
 			</div>
 

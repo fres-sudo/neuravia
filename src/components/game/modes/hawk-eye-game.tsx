@@ -1,6 +1,7 @@
 import { useGameStore, useGameTimer } from "@/stores/game-store";
 import { useEffect, useState, type SetStateAction } from "react";
 import { GameComplete } from "../game-complete";
+import { useMemo } from "react";
 
 export const HawkEyeGame = () => {
 	const { startTimer, tick, stopTimer } = useGameTimer();
@@ -24,11 +25,12 @@ export const HawkEyeGame = () => {
 	const [birds, setBirds] = useState<Bird[]>([]);
 	const [selectedBird, setSelectedBird] = useState<number | null>(null);
 
-	const birdEmojis =
-		profile?.customAssets["hawk-eye"]?.items?.slice(
-			0,
-			gameSettings.itemCount
-		) || ["🦅", "🐦", "🦜", "🕊️"].slice(0, gameSettings.itemCount);
+	const birdEmojis = useMemo(() => {
+	  if (profile?.customAssets["hawk-eye"]?.items) {
+		return profile.customAssets["hawk-eye"].items.slice(0, gameSettings.itemCount);
+	  }
+	  return ["🦅", "🐦", "🦜", "🕊️"].slice(0, gameSettings.itemCount);
+	}, [profile?.customAssets, gameSettings.itemCount]);
 
 	useEffect(() => {
 		// Reset game state when component mounts or phase changes to memorize
@@ -95,10 +97,22 @@ export const HawkEyeGame = () => {
 		}, 800);
 	};
 
-	const handleBirdClick = (birdId: SetStateAction<number | null>) => {
+	const handleBirdClick = (birdId: number) => {
 		setSelectedBird(birdId);
 		const isCorrect = birdId === targetIndex;
-		completeGame(isCorrect ? 15 : 5);
+		
+		const rawData = {
+			gameType: "hawk-eye",
+			roundNumber: gameSettings.itemCount,
+			correctAnswer: isCorrect,
+			selectedBirdId: birdId,
+			targetBirdId: targetIndex,
+			totalBirds: birds.length,
+			movesCount: 8, // Fixed number of moves
+			timeSpent: gameSettings.timerDuration - timeRemaining,
+		};
+		
+		completeGame(isCorrect ? 15 : 5, rawData);
 		setPhase("complete");
 		setTimeout(() => {
 			nextGame();

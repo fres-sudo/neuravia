@@ -95,7 +95,17 @@ export const FlashingMemoryGame = () => {
 			setUserSequence(newUserSequence);
 
 			if (newUserSequence.length === sequence.length) {
-				completeGame(20);
+				const rawData = {
+					gameType: "flashing-memory",
+					roundNumber: gameSettings.itemCount,
+					correctAnswer: true,
+					userSequence: newUserSequence.map(item => ({ position: item.position, number: item.number })),
+					correctSequence: sequence.map(item => ({ position: item.position, number: item.number })),
+					totalNumbers: sequence.length,
+					timeSpent: gameSettings.timerDuration - timeRemaining,
+				};
+				
+				completeGame(20, rawData);
 				setPhase("complete");
 				setTimeout(() => {
 					nextGame();
@@ -103,7 +113,19 @@ export const FlashingMemoryGame = () => {
 			}
 		} else {
 			// Wrong click - show feedback but continue
-			completeGame(5);
+			const rawData = {
+				gameType: "flashing-memory",
+				roundNumber: gameSettings.itemCount,
+				correctAnswer: false,
+				userSequence: userSequence.map(item => ({ position: item.position, number: item.number })),
+				correctSequence: sequence.map(item => ({ position: item.position, number: item.number })),
+				clickedPosition: position,
+				expectedNumber: expectedNext,
+				totalNumbers: sequence.length,
+				timeSpent: gameSettings.timerDuration - timeRemaining,
+			};
+			
+			completeGame(5, rawData);
 			setPhase("complete");
 			setTimeout(() => {
 				nextGame();
