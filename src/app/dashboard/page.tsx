@@ -11,19 +11,17 @@ import { hasCurrentWeekDiary } from "@/lib/utils";
 import { signOut, useSession } from "@/server/auth/auth-client";
 import { api } from "@/trpc/react";
 import { formatDate } from "date-fns";
-import {
-	User,
-	Brain,
-	Activity,
-	Clock,
-	Users,
-} from "lucide-react";
+import { User, Brain, Activity, Clock, Users, InfoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPatientDialog from "../../components/add-patient-dialog";
 import PatientCard from "../../components/patient-card";
+import { useState } from "react";
+import { InformationsCard } from "@/components/informations-card";
 
 export default function Page() {
 	const query = api.patients.fetch.useQuery();
+
+	const [showInfo, setShowInfo] = useState(false);
 
 	const { data: session } = useSession();
 	const router = useRouter();
@@ -169,9 +167,12 @@ export default function Page() {
 								</div>
 							) : query.data ? (
 								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-								  {query.data.map((patient) => (
-									<PatientCard key={patient.id} patient={patient} />
-								  ))}
+									{query.data.map((patient) => (
+										<PatientCard
+											key={patient.id}
+											patient={patient}
+										/>
+									))}
 								</div>
 							) : (
 								<div className="text-center py-12">
@@ -185,6 +186,9 @@ export default function Page() {
 							)}
 						</CardContent>
 					</Card>
+
+					{/**Readme Section */}
+					<InformationsCard />
 				</div>
 			</main>
 		</div>

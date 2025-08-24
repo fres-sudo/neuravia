@@ -12,16 +12,18 @@ interface ProfileSetupModalProps {
 	patientId?: string;
 }
 
-export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps) => {
+export const ProfileSetupModal = ({
+	onClose,
+	patientId,
+}: ProfileSetupModalProps) => {
 	const { startSession } = useGameSession();
 	const [step, setStep] = useState(1); // Start directly at difficulty selection
-	const [profession, setProfession] = useState("");
 	const [difficulty, setDifficulty] = useState<DifficultyLevel>("mild");
 	const [gameMode, setGameMode] = useState<GameMode>("short");
 
 	// Fetch patient data
 	const { data: patients, isLoading } = api.patients.fetch.useQuery();
-	const currentPatient = patients?.find(p => p.id === patientId);
+	const currentPatient = patients?.find((p) => p.id === patientId);
 
 	const difficulties = [
 		{
@@ -47,11 +49,8 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 	const handleStart = () => {
 		const customAssets = {
 			"scene-crasher": {
-				background: profession === "teacher" ? "blackboard" : "office",
-				items:
-					profession === "teacher"
-						? ["📚", "✏️", "🍎", "📐"]
-						: ["📱", "🔑", "☕", "📎"],
+				background: "office",
+				items: JSON.parse(currentPatient?.emojis || "[]"),
 			},
 			"hawk-eye": {
 				background: "sky",
@@ -68,7 +67,7 @@ export const ProfileSetupModal = ({ onClose, patientId }: ProfileSetupModalProps
 		};
 
 		const profile: PlayerProfile = {
-			profession,
+			profession: (currentPatient?.job as string) || "Unknown",
 			difficultyLevel: difficulty,
 			customAssets,
 		};

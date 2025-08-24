@@ -2,6 +2,11 @@ import type { Diary } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import {
+	generateUploadButton,
+	generateUploadDropzone,
+} from "@uploadthing/react";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -35,18 +40,18 @@ export function hasCurrentWeekDiary(diaries: Diary[]): boolean {
 
 // Helper function to get label color
 export function labelClass(label?: string): string {
-  switch (label) {
-    case "Non_Demented":
-      return "bg-emerald-500 text-white";
-    case "Very_Mild_Demented":
-      return "bg-yellow-500 text-white";
-    case "Mild_Demented":
-      return "bg-orange-500 text-white";
-    case "Moderate_Demented":
-      return "bg-red-500 text-white";
-    default:
-      return "bg-muted text-foreground";
-  }
+	switch (label) {
+		case "Non_Demented":
+			return "bg-emerald-500 text-white";
+		case "Very_Mild_Demented":
+			return "bg-yellow-500 text-white";
+		case "Mild_Demented":
+			return "bg-orange-500 text-white";
+		case "Moderate_Demented":
+			return "bg-red-500 text-white";
+		default:
+			return "bg-muted text-foreground";
+	}
 }
 
 export const takeFirst = <T>(values: T[]): T | null => {
@@ -62,3 +67,6 @@ export const takeFirstOrThrow = <T>(values: T[]): T => {
 		});
 	return values[0]!;
 };
+
+export const UploadButton = generateUploadButton<OurFileRouter>();
+export const UploadDropzone = generateUploadDropzone<OurFileRouter>();
