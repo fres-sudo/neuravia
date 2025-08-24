@@ -40,7 +40,7 @@ export default function Page() {
 	const handleCopyLink = async (patientId: string) => {
 		const url = `http${
 			process.env.NODE_ENV === "development"
-				? "://localhost"
+				? "://localhost:3000"
 				: `s://${process.env.VERCEL_URL}`
 		}/room/${session?.user.id}/${patientId}`;
 
@@ -103,7 +103,7 @@ export default function Page() {
 				<div className="max-w-7xl mx-auto space-y-8">
 					{/* Stats Cards */}
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						<Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm py-0 pb-6">
+						<Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm ">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between">
 									<div>
@@ -162,7 +162,7 @@ export default function Page() {
 					</div>
 
 					{/* Patients Section */}
-					<Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+					<Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm py-0 pb-6">
 						<CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 border-b border-blue-100/50 rounded-t-lg pt-6">
 							<div className="flex justify-between items-center">
 								<div>
