@@ -12,6 +12,7 @@ export const TodoListGame = () => {
 	const completeGame = useGameStore((state) => state.completeGame);
 	const nextGame = useGameStore((state) => state.nextGame);
 	const session = useGameStore((state) => state.session); // Add session to track rounds
+	const gameplayStarted = useGameStore((state) => state.gameplayStarted);
 
 	const [phase, setPhase] = useState("memorize");
 	const [originalTasks, setOriginalTasks] = useState<
@@ -105,7 +106,7 @@ export const TodoListGame = () => {
 	}, [session?.currentRound, stopTimer]);
 
 	useEffect(() => {
-		if (phase === "memorize" && tasks.length > 0 && !timerHasStarted && !gameCompleted) {
+		if (phase === "memorize" && tasks.length > 0 && !timerHasStarted && !gameCompleted && gameplayStarted) {
 			console.log("Starting memorize phase with tasks:", tasks);
 			const tasksWithId = tasks.map((task, index) => ({
 				id: index,
@@ -122,7 +123,7 @@ export const TodoListGame = () => {
 				console.log("Timer started for memorize phase");
 			}, 100);
 		}
-	}, [phase, gameSettings.timerDuration, tasks, startTimer, timerHasStarted, gameCompleted]);
+	}, [phase, gameSettings.timerDuration, tasks, startTimer, timerHasStarted, gameCompleted, gameplayStarted]);
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout | null = null;
@@ -195,7 +196,17 @@ export const TodoListGame = () => {
 
 	return (
 		<div className="relative w-full h-90  bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-4 border-yellow-300 overflow-hidden">
-			{phase === "memorize" && (
+			{/* Waiting for gameplay to start */}
+			{!gameplayStarted && (
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="text-center text-gray-700">
+						<div className="text-4xl mb-4">⏳</div>
+						<div className="text-2xl font-bold">Waiting for instructions to complete...</div>
+					</div>
+				</div>
+			)}
+
+			{phase === "memorize" && gameplayStarted && (
 				<div className="absolute inset-4 flex flex-col justify-center">
 					<h3 className="text-2xl font-bold text-center mb-6 text-gray-700">
 						Remember this order:
@@ -215,7 +226,7 @@ export const TodoListGame = () => {
 				</div>
 			)}
 
-			{phase === "playing" && (
+			{phase === "playing" && gameplayStarted && (
 				<div className="absolute inset-4 flex flex-col justify-center">
 					<h3 className="text-2xl font-bold text-center mb-4 text-gray-700">
 						Put them back in order: {userOrder.length}/{originalTasks.length}
@@ -254,7 +265,7 @@ export const TodoListGame = () => {
 				</div>
 			)}
 
-			{phase === "complete" && (
+			{phase === "complete" && gameplayStarted && (
 				<GameComplete
 					message={gameResult === 'correct' ? "Perfect! Right order! 🎯" : "Good try! Wrong order 📝"}
 					isCorrect={gameResult === 'correct'}
