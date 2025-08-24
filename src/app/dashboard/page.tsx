@@ -74,7 +74,9 @@ export default function Page() {
 							</div>
 							<div>
 								<h1 className="text-3xl font-bold">Boost Dashboard</h1>
-								<p className="text-blue-100 text-sm">Welcome back, {session?.user.name}!</p>
+								<p className="text-blue-100 text-sm">
+									Welcome back, {session?.user.name}!
+								</p>
 							</div>
 						</div>
 						<div className="flex items-center gap-3">
@@ -101,11 +103,13 @@ export default function Page() {
 				<div className="max-w-7xl mx-auto space-y-8">
 					{/* Stats Cards */}
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						<Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm">
+						<Card className="border-0 shadow-md bg-white/80 backdrop-blur-sm py-0 pb-6">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between">
 									<div>
-										<p className="text-sm font-medium text-muted-foreground">Total Patients</p>
+										<p className="text-sm font-medium text-muted-foreground">
+											Total Patients
+										</p>
 										<p className="text-3xl font-bold text-slate-900">
 											{query.data?.length || 0}
 										</p>
@@ -121,8 +125,12 @@ export default function Page() {
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between">
 									<div>
-										<p className="text-sm font-medium text-muted-foreground">Active Sessions</p>
-										<p className="text-3xl font-bold text-slate-900">{query.data?.filter(p => hasCurrentWeekDiary(p.diaries)).length || 0}
+										<p className="text-sm font-medium text-muted-foreground">
+											Active Sessions
+										</p>
+										<p className="text-3xl font-bold text-slate-900">
+											{query.data?.filter((p) => hasCurrentWeekDiary(p.diaries))
+												.length || 0}
 										</p>
 									</div>
 									<div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
@@ -136,7 +144,9 @@ export default function Page() {
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between">
 									<div>
-										<p className="text-sm font-medium text-muted-foreground">Member Since</p>
+										<p className="text-sm font-medium text-muted-foreground">
+											Member Since
+										</p>
 										<p className="text-lg font-semibold text-slate-700">
 											{session?.user?.createdAt
 												? formatDate(session?.user?.createdAt, "MMM yyyy")
@@ -153,7 +163,7 @@ export default function Page() {
 
 					{/* Patients Section */}
 					<Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
-						<CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 border-b border-blue-100/50 rounded-t-lg">
+						<CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 border-b border-blue-100/50 rounded-t-lg pt-6">
 							<div className="flex justify-between items-center">
 								<div>
 									<CardTitle className="text-2xl text-slate-800 flex items-center gap-3">
@@ -163,7 +173,8 @@ export default function Page() {
 										Your Patients
 									</CardTitle>
 									<CardDescription className="text-slate-600 mt-1">
-										Manage profiles and track development progress for each patient
+										Manage profiles and track development progress for each
+										patient
 									</CardDescription>
 								</div>
 								<div className="flex items-center gap-2">
@@ -185,12 +196,14 @@ export default function Page() {
 										No patients added yet
 									</h3>
 									<p className="text-muted-foreground mb-6 max-w-md mx-auto">
-										Start by adding your first patient to begin tracking their development and progress
+										Start by adding your first patient to begin tracking their
+										development and progress
 									</p>
 									<AddPatientDialog />
 								</div>
 							) : query.data ? (
-								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{query.data.map((patient) => (
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+									{query.data.map((patient) => (
 										<Card
 											key={patient.id}
 											className="group hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-md hover:scale-[1.02]">
@@ -206,7 +219,10 @@ export default function Page() {
 														}>
 														<Images className="h-3.5 w-3.5 text-blue-600" />
 													</Button>
-													<DeletePatientDialog patientId={patient.id} patientName={patient.name} />
+													<DeletePatientDialog
+														patientId={patient.id}
+														patientName={patient.name}
+													/>
 												</div>
 
 												{/* Patient Info */}
@@ -221,7 +237,8 @@ export default function Page() {
 															</h3>
 															<p className="text-sm text-muted-foreground flex items-center gap-1">
 																<Clock className="w-3 h-3" />
-																{patient.age} year{patient.age !== 1 ? "s" : ""} old
+																{patient.age} year{patient.age !== 1 ? "s" : ""}{" "}
+																old
 															</p>
 														</div>
 													</div>
@@ -236,7 +253,7 @@ export default function Page() {
 														<Copy className="h-3.5 w-3.5 mr-1.5" />
 														Room Link
 													</Button>
-													
+
 													{(() => {
 														const alreadyDone = hasCurrentWeekDiary(
 															patient.diaries
@@ -288,7 +305,9 @@ export default function Page() {
 									<div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
 										<Activity className="w-8 h-8 text-red-500" />
 									</div>
-									<p className="text-muted-foreground">Error loading patients. Please try again later.</p>
+									<p className="text-muted-foreground">
+										Error loading patients. Please try again later.
+									</p>
 								</div>
 							)}
 						</CardContent>
