@@ -17,13 +17,13 @@ export const InstructionModal = () => {
 				image: "🔍 👀",
 			},
 			{
-				title: "Items will disappear",
-				description: "After the timer, all items will be hidden",
+				title: "1 item will disappear",
+				description: "After the timer, one new item will be added",
 				image: "⏰ → ❓❓❓",
 			},
 			{
-				title: "Put them back!",
-				description: "Click to place items back in their original positions",
+				title: "Recognize it!",
+				description: "Recognize the new item and click it!",
 				image: "👆 ✨",
 			},
 		],

@@ -93,7 +93,7 @@ export const TodoListGame = () => {
 
 	// Reset game state when a new round starts
 	useEffect(() => {
-		console.log("Resetting todo list game for round:", session?.currentRound);
+		console.log("Resetting to-do list game for round:", session?.currentRound);
 		setPhase("memorize");
 		setOriginalTasks([]);
 		setShuffledTasks([]);
