@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { formatDate, labelClass } from "@/lib/utils";
 import { BoostScoreService } from "@/scoring/service";
 import { toast } from "sonner";
@@ -23,6 +23,10 @@ type InferenceResult = {
   probabilities: number[];
   all_labels: string[];
 };
+
+// Mock configuration - set to true for deployed version
+const USE_MOCK_DATA = true; // Change to true when deploying without ML server
+
 
 export default function Page() {
   const router = useRouter();
@@ -51,6 +55,7 @@ export default function Page() {
   );
 
   const uploadMutation = api.images.uploadAndProcess.useMutation();
+  const uploadOnlyMutation = api.images.uploadOnly.useMutation();
   const insertScoreMutation = api.scoring.insertWithPreviousScore.useMutation();
   const boostService = new BoostScoreService();
 
@@ -71,18 +76,26 @@ export default function Page() {
         })
       );
 
-      const uploadResult = await uploadMutation.mutateAsync({ patientId, files: base64Files });
+      let uploadResult;
+
+      if (USE_MOCK_DATA) {
+        // MOCK DATA VERSION - Upload to DB but with mock results
+        uploadResult = await uploadOnlyMutation.mutateAsync({ patientId, files: base64Files });
+        toast.info("Using mock AI analysis results for demonstration");
+      } else {
+        // REAL API VERSION - Uncomment when ML server is available
+        uploadResult = await uploadMutation.mutateAsync({ patientId, files: base64Files });
+      }
 
       // Calculate and insert scores for each processed image
       if (uploadResult && Array.isArray(uploadResult)) {
         for (const image of uploadResult) {
           if (image.results) {
             const results = image.results as InferenceResult;
-            
+
             // Calculate MRI score from probabilities
             const activityValue = await boostService.calculateMriUpload(results);
-            
-            // Insert the score with automatic previous score calculation
+
             await insertScoreMutation.mutateAsync({
               patientId: patientId,
               activityType: 'mri_upload',
@@ -94,8 +107,6 @@ export default function Page() {
                 uploadedAt: image.uploadedAt,
               },
             });
-            
-            toast.success(`MRI score calculated: ${activityValue.toFixed(1)}`);
           }
         }
       }
@@ -104,6 +115,7 @@ export default function Page() {
       await imagesQuery.refetch();
     } catch (err) {
       console.error(err);
+      toast.error("Failed to process images");
     } finally {
       setIsUploading(false);
       setIsProcessing(false);
@@ -123,11 +135,31 @@ export default function Page() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
+          {/* Mock Data Warning */}
+          {USE_MOCK_DATA && (
+            <Card className="mb-6 border-orange-200 bg-orange-50">
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <p className="text-sm font-medium text-orange-800">Demo Mode Active</p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      This is a demonstration using simulated AI analysis results. This should connect to the real server that actually works for MRI analysis, but we were unable to deploy it here due to free account limitations
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Upload Card */}
           <Card>
             <CardHeader>
               <CardTitle>Upload Brain MRI</CardTitle>
-              <CardDescription>Upload and process MRI images for analysis</CardDescription>
+              <CardDescription>
+                Upload and process MRI images for analysis
+                {USE_MOCK_DATA && " (Demo mode - results are simulated)"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -148,7 +180,12 @@ export default function Page() {
 
               <div className="flex justify-end">
                 <Button onClick={handleUploadAndProcess} disabled={disabled}>
-                  {isProcessing ? "Processing..." : isUploading ? "Uploading..." : "Upload & Process"}
+                  {isProcessing
+                    ? (USE_MOCK_DATA ? "Simulating Analysis..." : "Processing...")
+                    : isUploading
+                    ? "Uploading..."
+                    : `Upload & ${USE_MOCK_DATA ? "Simulate" : "Process"}`
+                  }
                 </Button>
               </div>
             </CardContent>
@@ -159,13 +196,18 @@ export default function Page() {
             <Card>
               <CardHeader>
                 <CardTitle>Upload History</CardTitle>
-                <CardDescription>Previously uploaded MRI images and processing results</CardDescription>
+                <CardDescription>
+                  Previously uploaded MRI images and processing results
+                  {USE_MOCK_DATA && " (Showing real database data only)"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {imagesQuery.isLoading ? (
                   <div className="py-6 text-sm text-muted-foreground">Loading...</div>
                 ) : !imagesQuery.data || imagesQuery.data.length === 0 ? (
-                  <p className="text-muted-foreground">No images uploaded yet.</p>
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground mb-2">No images uploaded yet.</p>
+                  </div>
                 ) : (
                   <div className="space-y-6">
                     {imagesQuery.data.map((img) => {

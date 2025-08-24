@@ -36,4 +36,23 @@ export const imagesRouter = createTRPCRouter({
     const results = await imageService.uploadAndProcess(input.patientId, input.files);
     return results;
   }),
+
+  uploadOnly: protectedProcedure
+  .input(
+    z.object({
+      patientId: z.string(),
+      files: z.array(
+        z.object({
+          name: z.string(),
+          contentBase64: z.string(),
+        })
+      ),
+    })
+  )
+  .mutation(async ({ input }) => {
+    // Only upload, don't process
+    const results = await imageService.uploadOnly(input.patientId, input.files);
+    return results;
+  }),
+
 });
