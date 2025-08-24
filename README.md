@@ -1,29 +1,86 @@
-# Create T3 App
+# 🧠 BOOST
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+BOOST is a precision cognitive care platform designed to empower families and healthcare providers.  
+It provides tools to manage patients, caregivers, cognitive games, MRI analysis, and personalized settings, combining **Next.js**, **tRPC**, **Turso/libSQL**, and **OpenAI**.
 
-## What's next? How do I make an app with this?
+---
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## ✨ Features
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- 👩‍⚕️ **Patient & Caregiver Management**  
+  Add, update, and manage patients with detailed initial information.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- ⚙️ **Custom Settings**  
+  Each patient has personalized settings (language, difficulty sensitivity, reminders, etc.).
 
-## Learn More
+- 🧩 **Cognitive Tools**  
+  Support for cognitive games, Alzheimer scoring, and MRI analysis.
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- 🤖 **AI-powered Enhancements**  
+  Automatic emoji generation for patient jobs (via OpenAI API).
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+- 📂 **File Uploads**  
+  MRI scans and patient images stored in `/public/uploads`.
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- 🔐 **Authentication & Authorization**  
+  Role-based access for caregivers and patients.
 
-## How do I deploy this?
+---
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## 🛠️ Tech Stack
+
+- **Frontend**: [Next.js](https://nextjs.org/) + [React](https://reactjs.org/)  
+- **API Layer**: [tRPC](https://trpc.io/) + [Zod](https://zod.dev/)  
+- **Database**: [Turso (libSQL)](https://turso.tech/) with drizzle ORM  
+- **AI Integration**: [OpenAI API](https://platform.openai.com/)  
+
+---
+
+## 📦 Installation
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/fres-sudo/neuravia.git
+cd neuravia
+npm install
+```
+(try with `npm install --legacy-peer-deps` if you face issues)
+
+Set up environment variables in a `.env` file:
+
+```env
+DATABASE_URL=...
+DATABASE_AUTH_TOKEN=...
+BETTER_AUTH_SECRET=...
+BETTER_AUTH_URL=http://localhost:3000
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+
+#### 🖼️ Image Processing Setup
+To enable image uploads and processing, we have a separate Python-based server that use FastAPI to expose an endpoint for MRI classification.
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/glaucorampone/NeuraVia-Hacks.git
+cd NeuraVia-Hacks
+pip install -r requirements.txt
+```
+
+Launch the FastAPI server:
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 5000
+```
+
+Ensure that the `USE_MOCK_DATA` variable in the `src/app/patient/[id]/upload/page.tsx` file is set to `false` to enable real MRI classification.
