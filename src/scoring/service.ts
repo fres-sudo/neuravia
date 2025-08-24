@@ -58,8 +58,39 @@ export class BoostScoreService {
       return Math.max(0, Math.min(100, (avgScore - 1) * 25));
     }
 
-    async calculateGamePlayed(gameScore: number): Promise<number> {
-        return gameScore;
+    async calculateGamePlayed(sessionData: any): Promise<number> {
+        // Calculate score based on comprehensive session data
+        const { totalScore, averageScore, gamesCompleted, rawData } = sessionData;
+        
+        // Base score from average performance
+        let baseScore = averageScore;
+        
+        // Bonus for completing all games
+        if (gamesCompleted.length >= 4) {
+            baseScore += 10;
+        }
+        
+        // Bonus for consistency (low variance in scores)
+        const scores = Object.values(rawData).map((gameData: any) => {
+            if (Array.isArray(gameData.rounds)) {
+                return gameData.rounds.reduce((sum: number, round: any) => sum + round.score, 0) / gameData.rounds.length;
+            }
+            return 0;
+        }).filter(score => score > 0);
+        
+        if (scores.length > 1) {
+            const variance = scores.reduce((sum, score) => sum + Math.pow(score - averageScore, 2), 0) / scores.length;
+            const consistencyBonus = Math.max(0, 15 - variance);
+            baseScore += consistencyBonus;
+        }
+        
+        // Penalty for slow performance
+        const sessionDuration = sessionData.sessionDuration || 0;
+        const timePenalty = Math.max(0, (sessionDuration - 300000) / 60000); // Penalty after 5 minutes
+        baseScore = Math.max(0, baseScore - timePenalty);
+        
+        // Ensure score is within 0-100 range
+        return Math.max(0, Math.min(100, baseScore));
     }
 
     // Calculate new score based on previous score and activity boost

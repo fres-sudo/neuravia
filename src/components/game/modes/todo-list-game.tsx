@@ -1,6 +1,7 @@
 import { useGameStore, useGameTimer } from "@/stores/game-store";
 import { useEffect, useState } from "react";
 import { GameComplete } from "../game-complete";
+import { useMemo } from "react";
 
 export const TodoListGame = () => {
 	const { startTimer, tick, stopTimer } = useGameTimer();
@@ -22,20 +23,21 @@ export const TodoListGame = () => {
 		Array<{ id: number; text: string; order: number }>
 	>([]);
 
-	const tasks =
-		profile?.profession === "teacher"
+	const tasks = useMemo(() => {
+		  return profile?.profession === "teacher"
 			? [
-					"📚 Prepare lessons",
-					"✏️ Grade papers",
-					"🍎 Eat lunch",
-					"📐 Setup classroom",
+				"📚 Prepare lessons",
+				"✏️ Grade papers",
+				"🍎 Eat lunch",
+				"📐 Setup classroom",
 			  ].slice(0, gameSettings.itemCount)
 			: [
-					"☕ Morning coffee",
-					"📧 Check emails",
-					"📝 Write report",
-					"📞 Team meeting",
+				"☕ Morning coffee",
+				"📧 Check emails",
+				"📝 Write report",
+				"📞 Team meeting",
 			  ].slice(0, gameSettings.itemCount);
+		}, [profile?.profession, gameSettings.itemCount]);
 
 	useEffect(() => {
 		if (phase === "memorize") {
@@ -94,7 +96,18 @@ export const TodoListGame = () => {
 			const isCorrect = newOrder.every(
 				(task, index) => task.order === index + 1
 			);
-			completeGame(isCorrect ? 15 : 8);
+			
+			const rawData = {
+				gameType: "todo-list",
+				roundNumber: gameSettings.itemCount,
+				correctAnswer: isCorrect,
+				userOrder: newOrder.map(t => ({ id: t.id, order: t.order })),
+				correctOrder: originalTasks.map(t => ({ id: t.id, order: t.order })),
+				totalTasks: originalTasks.length,
+				timeSpent: gameSettings.timerDuration - timeRemaining,
+			};
+			
+			completeGame(isCorrect ? 15 : 8, rawData);
 			setPhase("complete");
 			setTimeout(() => {
 				nextGame();

@@ -104,6 +104,21 @@ export const SceneCrasherGame = () => {
 		y: number;
 		isNew?: boolean;
 	}) => {
+		const rawData = {
+			gameType: "scene-crasher",
+			roundNumber: gameSettings.itemCount,
+			correctAnswer: clickedItem.isNew,
+			clickedItem: {
+				id: clickedItem.id,
+				x: clickedItem.x,
+				y: clickedItem.y,
+				isNew: clickedItem.isNew,
+			},
+			originalItems: originalItems.length,
+			totalItems: finalItems.length,
+			timeSpent: 5 - timeRemaining, // Time spent memorizing
+		};
+
 		if (clickedItem.isNew) {
 			// Correct! Player found the new item
 			completeGame(15);
@@ -128,7 +143,7 @@ export const SceneCrasherGame = () => {
 
 	return (
 		<div
-			className={`relative w-full h-96 ${backgroundClass} rounded-2xl border-4 border-amber-300 overflow-hidden`}>
+			className={`relative w-full h-66 ${backgroundClass} rounded-2xl border-4 border-amber-300 overflow-hidden`}>
 			{/* Memorize Phase: Show N identical items */}
 			{phase === "memorize" && (
 				<>
@@ -191,8 +206,8 @@ export const SceneCrasherGame = () => {
 			{phase === "wrong" && (
 				<div className="absolute inset-0 flex items-center justify-center bg-red-400 bg-opacity-90">
 					<div className="text-center text-white">
-						<div className="text-6xl mb-4">❌</div>
-						<p className="text-3xl font-bold">Wrong item!</p>
+						<div className="text-4xl mb-3">❌</div>
+						<p className="text-2xl font-bold">Wrong item!</p>
 						<p className="text-lg mt-2">That was an original item.</p>
 					</div>
 				</div>

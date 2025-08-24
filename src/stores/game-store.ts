@@ -18,6 +18,19 @@ export interface GameSession {
 	score: number;
 	startTime: Date;
 	gamesCompleted: GameType[];
+	rawData: {
+		[gameType: string]: {
+			rounds: Array<{
+				roundNumber: number;
+				score: number;
+				timeSpent: number;
+				errors: number;
+				correctAnswers: number;
+				totalAttempts: number;
+				details: any;
+			}>;
+		};
+	};
 }
 
 export interface PlayerProfile {
@@ -47,10 +60,11 @@ interface GameStore {
 	timeRemaining: number;
 	timerActive: boolean;
 	gameSettings: GameSettings;
-	startSession: (mode: GameMode, profile: PlayerProfile) => void;
+	patientId?: string;
+	startSession: (mode: GameMode, profile: PlayerProfile, patientId?: string) => void;
 	endSession: () => void;
 	startGame: (gameType: GameType) => void;
-	completeGame: (score: number) => void;
+	completeGame: (score: number, rawData?: any) => void;
 	nextGame: () => void;
 	startTimer: (duration: number) => void;
 	stopTimer: () => void;
@@ -76,7 +90,7 @@ const useGameStore = create<GameStore>()(
 				itemCount: 4,
 				showInstructions: true,
 			},
-			startSession: (mode, profile) => {
+			startSession: (mode, profile, patientId) => {
 				const totalRounds = mode === "short" ? 4 : 16;
 				set({
 					session: {
@@ -87,8 +101,10 @@ const useGameStore = create<GameStore>()(
 						score: 0,
 						startTime: new Date(),
 						gamesCompleted: [],
+						rawData: {},
 					},
 					profile,
+					patientId,
 					showWelcome: false,
 					isPlaying: true,
 				});
@@ -109,6 +125,7 @@ const useGameStore = create<GameStore>()(
 					showWelcome: true,
 					timerActive: false,
 					showInstructions: false,
+					patientId: undefined,
 				});
 			},
 			startGame: (gameType) => {
@@ -121,14 +138,35 @@ const useGameStore = create<GameStore>()(
 					get().showGameInstructions(gameType);
 				}
 			},
-			completeGame: (gameScore) => {
+			completeGame: (gameScore, rawData) => {
 				const { session, currentGame } = get();
 				if (!session || !currentGame) return;
+				
+				// Store raw data for this game
+				const updatedRawData = {
+					...session.rawData,
+					[currentGame]: {
+						rounds: [
+							...(session.rawData[currentGame]?.rounds || []),
+							{
+								roundNumber: session.currentRound,
+								score: gameScore,
+								timeSpent: 0, // Will be calculated from timer
+								errors: 0, // Will be calculated from raw data
+								correctAnswers: 0, // Will be calculated from raw data
+								totalAttempts: 0, // Will be calculated from raw data
+								details: rawData || {},
+							},
+						],
+					},
+				};
+
 				set(() => ({
 					session: {
 						...session,
 						score: session.score + gameScore,
 						gamesCompleted: [...session.gamesCompleted, currentGame],
+						rawData: updatedRawData,
 					},
 				}));
 			},
@@ -145,6 +183,7 @@ const useGameStore = create<GameStore>()(
 				const nextRound =
 					nextIndex === 0 ? session.currentRound + 1 : session.currentRound;
 				if (nextRound > session.totalRounds) {
+					// Session is complete, end it
 					get().endSession();
 					return;
 				}
@@ -197,6 +236,7 @@ const useGameStore = create<GameStore>()(
 			hideInstructions: () => {
 				set({ showInstructions: false });
 			},
+
 		}),
 		{ name: "alzheimer-game-store" }
 	)
