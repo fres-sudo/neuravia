@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSession } from "@/server/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const Hero = () => {
 	const { data: session } = useSession();
@@ -89,6 +90,7 @@ const Hero = () => {
 								{session?.user ? "Go to Dashboard" : "Start Free Trial"}
 								<ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
 							</Button>
+							<Link href="https://youtu.be/fW6RfPTXViga" about="_blank">
 							<Button
 								variant="outline"
 								size="lg"
@@ -96,6 +98,8 @@ const Hero = () => {
 								<Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
 								Watch Demo
 							</Button>
+							</Link>
+							
 						</div>
 
 						{/* Social Proof Stats */}
