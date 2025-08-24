@@ -19,28 +19,39 @@ export const FlashingMemoryGame = () => {
 	);
 	const nextGame = useGameStore((state: { nextGame: any }) => state.nextGame);
 	const session = useGameStore((state: { session: any }) => state.session); // Add session to track rounds
-	const gameplayStarted = useGameStore((state: { gameplayStarted: any }) => state.gameplayStarted);
+	const gameplayStarted = useGameStore(
+		(state: { gameplayStarted: any }) => state.gameplayStarted
+	);
 
 	const [phase, setPhase] = useState("memorize");
-	const [sequence, setSequence] = useState<Array<{
-		position: number;
-		number: number;
-		row: number;
-		col: number;
-	}>>([]);
-	const [userSequence, setUserSequence] = useState<Array<{
-		position: number;
-		number: number;
-		row: number;
-		col: number;
-	}>>([]);
+	const [sequence, setSequence] = useState<
+		Array<{
+			position: number;
+			number: number;
+			row: number;
+			col: number;
+		}>
+	>([]);
+	const [userSequence, setUserSequence] = useState<
+		Array<{
+			position: number;
+			number: number;
+			row: number;
+			col: number;
+		}>
+	>([]);
 	const [gridSize] = useState(3); // 3x3 grid
 	const [timerHasStarted, setTimerHasStarted] = useState(false);
-	const [gameResult, setGameResult] = useState<'correct' | 'incorrect' | null>(null);
+	const [gameResult, setGameResult] = useState<"correct" | "incorrect" | null>(
+		null
+	);
 
 	// Reset game state when a new round starts
 	useEffect(() => {
-		console.log("Resetting flashing memory game for round:", session?.currentRound);
+		console.log(
+			"Resetting flashing memory game for round:",
+			session?.currentRound
+		);
 		setPhase("memorize");
 		setSequence([]);
 		setUserSequence([]);
@@ -50,8 +61,18 @@ export const FlashingMemoryGame = () => {
 	}, [session?.currentRound, stopTimer]);
 
 	useEffect(() => {
-		if (phase === "memorize" && sequence.length === 0 && !timerHasStarted && gameSettings?.itemCount && gameSettings?.timerDuration && gameplayStarted) {
-			console.log("Starting memorize phase for flashing memory with settings:", gameSettings);
+		if (
+			phase === "memorize" &&
+			sequence.length === 0 &&
+			!timerHasStarted &&
+			gameSettings?.itemCount &&
+			gameSettings?.timerDuration &&
+			gameplayStarted
+		) {
+			console.log(
+				"Starting memorize phase for flashing memory with settings:",
+				gameSettings
+			);
 			// Generate random sequence
 			const positions: number[] = [];
 			while (positions.length < gameSettings.itemCount) {
@@ -79,11 +100,20 @@ export const FlashingMemoryGame = () => {
 				setTimerHasStarted(true);
 			}, 300);
 		}
-	}, [phase, gameSettings?.itemCount, gameSettings?.timerDuration, gridSize, startTimer, timerHasStarted, sequence.length, gameplayStarted]);
+	}, [
+		phase,
+		gameSettings?.itemCount,
+		gameSettings?.timerDuration,
+		gridSize,
+		startTimer,
+		timerHasStarted,
+		sequence.length,
+		gameplayStarted,
+	]);
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout | null = null;
-		
+
 		if (timerActive && timeRemaining > 0) {
 			interval = setInterval(() => {
 				tick();
@@ -91,7 +121,13 @@ export const FlashingMemoryGame = () => {
 		}
 
 		// Handle phase transitions - only if timer was actually started and is now finished
-		if (timeRemaining === 0 && phase === "memorize" && timerHasStarted && !timerActive && sequence.length > 0) {
+		if (
+			timeRemaining === 0 &&
+			phase === "memorize" &&
+			timerHasStarted &&
+			!timerActive &&
+			sequence.length > 0
+		) {
 			console.log("Transitioning from memorize to playing phase");
 			setPhase("playing");
 			stopTimer();
@@ -102,17 +138,26 @@ export const FlashingMemoryGame = () => {
 				clearInterval(interval);
 			}
 		};
-	}, [timerActive, timeRemaining, phase, tick, stopTimer, timerHasStarted, sequence.length]);
+	}, [
+		timerActive,
+		timeRemaining,
+		phase,
+		tick,
+		stopTimer,
+		timerHasStarted,
+		sequence.length,
+	]);
 
 	const handleCellClick = (position: number) => {
 		if (phase !== "playing") return;
-		
-		const expectedNext = userSequence.length + 1;
-		const clickedItem = sequence.find(
-			(item) => item.position === position
-		);
 
-		console.log(`Clicked position ${position}, expected number ${expectedNext}, clicked item:`, clickedItem);
+		const expectedNext = userSequence.length + 1;
+		const clickedItem = sequence.find((item) => item.position === position);
+
+		console.log(
+			`Clicked position ${position}, expected number ${expectedNext}, clicked item:`,
+			clickedItem
+		);
 
 		if (clickedItem && clickedItem.number === expectedNext) {
 			const newUserSequence = [...userSequence, clickedItem];
@@ -125,14 +170,20 @@ export const FlashingMemoryGame = () => {
 					gameType: "flashing-memory",
 					roundNumber: gameSettings.itemCount,
 					correctAnswer: true,
-					userSequence: newUserSequence.map(item => ({ position: item.position, number: item.number })),
-					correctSequence: sequence.map(item => ({ position: item.position, number: item.number })),
+					userSequence: newUserSequence.map((item) => ({
+						position: item.position,
+						number: item.number,
+					})),
+					correctSequence: sequence.map((item) => ({
+						position: item.position,
+						number: item.number,
+					})),
 					totalNumbers: sequence.length,
 					timeSpent: gameSettings.timerDuration - timeRemaining,
 				};
-				
+
 				completeGame(20, rawData);
-				setGameResult('correct');
+				setGameResult("correct");
 				setPhase("complete");
 				setTimeout(() => {
 					nextGame();
@@ -145,16 +196,22 @@ export const FlashingMemoryGame = () => {
 				gameType: "flashing-memory",
 				roundNumber: gameSettings.itemCount,
 				correctAnswer: false,
-				userSequence: userSequence.map(item => ({ position: item.position, number: item.number })),
-				correctSequence: sequence.map(item => ({ position: item.position, number: item.number })),
+				userSequence: userSequence.map((item) => ({
+					position: item.position,
+					number: item.number,
+				})),
+				correctSequence: sequence.map((item) => ({
+					position: item.position,
+					number: item.number,
+				})),
 				clickedPosition: position,
 				expectedNumber: expectedNext,
 				totalNumbers: sequence.length,
 				timeSpent: gameSettings.timerDuration - timeRemaining,
 			};
-			
+
 			completeGame(5, rawData);
-			setGameResult('incorrect');
+			setGameResult("incorrect");
 			setPhase("complete");
 			setTimeout(() => {
 				nextGame();
@@ -165,12 +222,8 @@ export const FlashingMemoryGame = () => {
 	const renderGrid = () => {
 		const cells: React.JSX.Element[] = [];
 		for (let i = 0; i < 9; i++) {
-			const sequenceItem = sequence.find(
-				(item) => item.position === i
-			);
-			const userClickedItem = userSequence.find(
-				(item) => item.position === i
-			);
+			const sequenceItem = sequence.find((item) => item.position === i);
+			const userClickedItem = userSequence.find((item) => item.position === i);
 
 			const showNumber = phase === "memorize" && sequenceItem;
 			const showUserNumber = phase === "playing" && userClickedItem;
@@ -181,22 +234,18 @@ export const FlashingMemoryGame = () => {
 					onClick={() => handleCellClick(i)}
 					className={`
             							w-16 h-16 border-2 border-gray-400 rounded-lg text-2xl font-bold transition-all duration-300
-					${showNumber 
-						? "bg-blue-500 text-white shadow-lg animate-pulse scale-105" 
-						: "bg-white hover:bg-gray-100"
+					${
+						showNumber
+							? "bg-blue-500 text-white shadow-lg animate-pulse scale-105"
+							: "bg-white hover:bg-gray-100"
 					}
-					${showUserNumber 
-						? "bg-green-500 text-white shadow-lg" 
-						: ""
+					${showUserNumber ? "bg-green-500 text-white shadow-lg" : ""}
+					${
+						phase === "playing" && !userClickedItem
+							? "hover:bg-blue-50 hover:scale-105 cursor-pointer"
+							: ""
 					}
-					${phase === "playing" && !userClickedItem 
-						? "hover:bg-blue-50 hover:scale-105 cursor-pointer" 
-						: ""
-					}
-					${phase !== "playing" || userClickedItem 
-						? "cursor-not-allowed" 
-						: ""
-					}
+					${phase !== "playing" || userClickedItem ? "cursor-not-allowed" : ""}
           		`}
 					disabled={phase !== "playing" || !!userClickedItem}>
 					{showNumber ? sequenceItem!.number : ""}
@@ -208,16 +257,20 @@ export const FlashingMemoryGame = () => {
 	};
 
 	return (
-		<div className="relative w-full h-90  bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl border-4 border-purple-300 overflow-hidden">
+		<div className="relative w-full h-100 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl border-4 border-purple-300 overflow-hidden">
 			<div className="absolute inset-0 flex flex-col items-center justify-center">
 				{!gameplayStarted ? (
 					<div className="text-center text-gray-700">
 						<div className="text-4xl mb-4">⏳</div>
-						<div className="text-2xl font-bold">Waiting for instructions to complete...</div>
+						<div className="text-2xl font-bold">
+							Waiting for instructions to complete...
+						</div>
 					</div>
 				) : !gameSettings?.itemCount || !gameSettings?.timerDuration ? (
 					<div className="text-center">
-						<div className="text-2xl font-bold text-gray-700 mb-4">Loading game...</div>
+						<div className="text-2xl font-bold text-gray-700 mb-4">
+							Loading game...
+						</div>
 						<div className="animate-spin rounded-full h-8 w-8 border-b-4 border-purple-500 mx-auto"></div>
 					</div>
 				) : (
@@ -228,7 +281,7 @@ export const FlashingMemoryGame = () => {
 									Remember the numbers and their positions!
 								</h3>
 								<p className="text-lg text-gray-600">
-									Numbers will appear in the grid, then disappear. 
+									Numbers will appear in the grid, then disappear.
 								</p>
 								<p className="text-lg text-gray-600">
 									Click them back in order: 1, 2, 3, 4...
@@ -252,15 +305,21 @@ export const FlashingMemoryGame = () => {
 							</div>
 						)}
 
-						{gameplayStarted && <div className="grid grid-cols-3 gap-2">{renderGrid()}</div>}
+						{gameplayStarted && (
+							<div className="grid grid-cols-3 gap-2">{renderGrid()}</div>
+						)}
 					</>
 				)}
 			</div>
 
 			{phase === "complete" && gameplayStarted && (
-				<GameComplete 
-					message={gameResult === 'correct' ? "Perfect memory! 🧠" : "Good try! Remember the sequence! 💭"} 
-					isCorrect={gameResult === 'correct'}
+				<GameComplete
+					message={
+						gameResult === "correct"
+							? "Perfect memory! 🧠"
+							: "Good try! Remember the sequence! 💭"
+					}
+					isCorrect={gameResult === "correct"}
 				/>
 			)}
 		</div>
