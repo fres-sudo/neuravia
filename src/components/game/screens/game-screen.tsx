@@ -12,7 +12,13 @@ import { TodoListGame } from "../modes/todo-list-game";
 import { HawkEyeGame } from "../modes/hawk-eye-game";
 import { useGameScoring } from "@/hooks/use-game-scoring";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // Add this import
+import { useRouter } from "next/navigation";
+import {BoostScoreService} from "@/scoring/service";
+import {api} from "@/trpc/react";
+import {skipToken} from "@tanstack/query-core"; // Add this import
+import { toast } from "sonner";
+
+const boostService = new BoostScoreService();
 
 export const GameScreen = () => {
 	const isPlaying = useGameStore((state) => state.isPlaying);
@@ -20,58 +26,79 @@ export const GameScreen = () => {
 	const session = useGameStore((state) => state.session);
 	const patientId = useGameStore((state) => state.patientId);
 	const { saveSessionScore } = useGameScoring();
-	
+	const insertScoreMutation = api.scoring.insert.useMutation();
+
 	const router = useRouter(); // Add router hook
 	const [isSessionComplete, setIsSessionComplete] = useState(false);
 
+	const latestScoreQuery = api.scoring.getLatestScore.useQuery(
+	  patientId ? { patientId } : skipToken
+	);
+
 	// Handle session completion
 	useEffect(() => {
-		if (session && session.currentRound > session.totalRounds && !isSessionComplete) {
-			setIsSessionComplete(true);
-			
-			// Session is complete, save the score
-			const sessionData = {
-				totalScore: session.score,
-				averageScore: session.score / Math.max(session.gamesCompleted.length, 1),
-				sessionDuration: Date.now() - session.startTime.getTime(),
-				gamesCompleted: session.gamesCompleted,
-				rawData: session.rawData,
-				sessionMode: session.mode,
-			};
+	  if (!session || isSessionComplete) return;
+	  if (session.currentRound <= session.totalRounds - 1) return;
+	  if (latestScoreQuery.isLoading) return;
 
-			if (patientId) {
-				saveSessionScore(patientId, sessionData)
-					.then(() => {
-						// Get caregiver ID from URL path: /room/caregiverId/patientId
-						const pathParts = window.location.pathname.split('/');
-						const roomIndex = pathParts.indexOf('room');
-						
-						if (roomIndex !== -1 && roomIndex + 1 < pathParts.length) {
-							const caregiverId = pathParts[roomIndex + 1];
-							// Redirect back to the room welcome screen
-							router.push(`/room/${caregiverId}/${patientId}`);
-						} else {
-							// Fallback redirect if we can't determine caregiver ID
-							console.warn('Could not determine caregiver ID from URL');
-							router.push('/dashboard'); // or wherever you want to redirect as fallback
-						}
-					})
-					.catch((error) => {
-						console.error('Failed to save session, but redirecting anyway:', error);
-						// Still redirect even if save failed
-						const pathParts = window.location.pathname.split('/');
-						const roomIndex = pathParts.indexOf('room');
-						
-						if (roomIndex !== -1 && roomIndex + 1 < pathParts.length) {
-							const caregiverId = pathParts[roomIndex + 1];
-							router.push(`/room/${caregiverId}/${patientId}`);
-						} else {
-							router.push('/dashboard');
-						}
-					});
+	  const handleSessionComplete = async () => {
+		setIsSessionComplete(true);
+
+		try {
+		  toast.success(`Session completed! Score: ${session.score}`);
+
+		  // prepare sessionData
+		  const sessionData = {
+			totalScore: session.score,
+			averageScore: session.score / Math.max(session.gamesCompleted.length, 1),
+			sessionDuration: Date.now() - session.startTime.getTime(),
+			gamesCompleted: session.gamesCompleted,
+			rawData: session.rawData,
+			sessionMode: session.mode,
+		  };
+		  console.log('Saving sessionData', sessionData);
+
+		  if (!latestScoreQuery.data || latestScoreQuery.isLoading) return;
+
+		  const previousScore = latestScoreQuery.data?.newScore ?? 0;
+
+		  // prepare boost score
+		  const scoreData = boostService.prepareScoreData({
+			patientId: patientId!,
+			activityType: 'game_played',
+			activityValue: session.score,
+			previousScore: previousScore,
+			metadata: {},
+		  });
+
+		  await insertScoreMutation.mutateAsync(scoreData);
+		  console.log('Score saved successfully');
+
+		  if (patientId) {
+			// await saveSessionScore(patientId, sessionData);
+
+			// safely parse caregiverId
+			const pathParts = window.location.pathname.split('/');
+			const roomIndex = pathParts.indexOf('room');
+			const caregiverId =
+			  roomIndex !== -1 && roomIndex + 1 < pathParts.length
+				? pathParts[roomIndex + 1]
+				: null;
+
+			if (caregiverId) {
+			  router.push(`/room/${caregiverId}/${patientId}/`);
+			} else {
+			  router.push('/dashboard');
 			}
+		  }
+		} catch (err) {
+		  console.error('Error saving session', err);
+		  router.push('/dashboard');
 		}
-	}, [session, patientId, saveSessionScore, router, isSessionComplete]);
+	  };
+
+	  handleSessionComplete();
+	}, [latestScoreQuery.data, latestScoreQuery.isLoading, session, patientId, saveSessionScore, insertScoreMutation, router, isSessionComplete]);
 
 	if (!isPlaying) return null;
 
@@ -86,8 +113,7 @@ export const GameScreen = () => {
 					<p className="text-lg text-gray-600 mb-4">
 						Session completed successfully!
 					</p>
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-					<p className="text-sm text-gray-500 mt-2">Saving your progress...</p>
+					<p className="text-sm text-gray-500 mt-2">If you want to play again, reload the page!</p>
 				</div>
 			</div>
 		);

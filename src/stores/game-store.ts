@@ -232,9 +232,9 @@ const useGameStore = create<GameStore>()(
 			},
 			updateGameSettings: (level, _) => {
 				const settingsMap = {
-					mild: { timerDuration: 15, itemCount: 4 },
-					moderate: { timerDuration: 10, itemCount: 3 },
-					severe: { timerDuration: 20, itemCount: 2 },
+					mild: { timerDuration: 5, itemCount: 4 },
+					moderate: { timerDuration: 8, itemCount: 3 },
+					severe: { timerDuration: 12, itemCount: 2 },
 				};
 				set({
 					gameSettings: {

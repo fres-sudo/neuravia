@@ -264,7 +264,7 @@ export default function Page() {
 																	className={`w-full shadow-sm ${
 																		alreadyDone
 																			? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-																			: "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+																			: "bg-gradient-to-r from-orange-300 to-orange-400 hover:from-orange-400 hover:to-orange-500 text-white"
 																	}`}>
 																	<Notebook className="h-3.5 w-3.5 mr-1.5" />
 																	{alreadyDone ? "Diary Done" : "Fill Diary"}
